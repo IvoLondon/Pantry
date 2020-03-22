@@ -5,12 +5,34 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "parcel index.html -p 3002"
+    "dev": "parcel index.html -p 3002",
+    "lint": "eslint --ext=js --ext=jsx ./src",
+    "lint-fix": "eslint --ext=js --ext=jsx ./src --fix"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "app": "^0.1.0",
     "parcel-bundler": "^1.12.4",
-    "quagga": "^0.12.1"
+    "quagga": "^0.12.1",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.9.0",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/plugin-transform-runtime": "^7.9.0",
+    "babel-core": "^6.26.3",
+    "babel-eslint": "^10.1.0",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-react": "^6.24.1",
+    "eslint": "^6.8.0",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-import": "^2.20.1",
+    "eslint-plugin-node": "^11.0.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-react": "^7.19.0",
+    "eslint-plugin-standard": "^4.0.1"
   }
 }
