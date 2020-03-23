@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import * as Quagga from './quagga';
 
+import './style.scss';
+
 class Scanner extends Component {
     state = {
 
@@ -22,14 +24,28 @@ class Scanner extends Component {
                 }
             },
             locator: {
-                patchSize: 'medium',
-                halfSample: true
+                patchSize: 'large',
+                halfSample: true,
+                debug: {
+                    showCanvas: false,
+                    showPatches: true,
+                    showFoundPatches: true,
+                    showSkeleton: true,
+                    showLabels: true,
+                    showPatchLabels: true,
+                    showRemainingPatchLabels: true,
+                    boxFromPatches: {
+                      showTransformed: true,
+                      showTransformedBox: true,
+                      showBB: true
+                    }
+                  }
             },
-            // numOfWorkers: 4,
+            numOfWorkers: 0,
             frequency: 1,
             decoder: {
                 readers: [{
-                    format: 'ean_8_reader',
+                    format: 'ean_reader',
                     config: {}
                 }]
             },
@@ -44,7 +60,10 @@ class Scanner extends Component {
             // App.attachListeners();
             // App.checkCapabilities();
             Quagga.start();
+            
+            checkCapabilities();
         });
+
 
         const handleError = (err) => {
             console.log(err);
@@ -55,26 +74,78 @@ class Scanner extends Component {
             filter: function(codeResult) {
                 // only store results which match this constraint
                 // e.g.: codeResult
+                // TODO: get objects
                 return true;
             }
+        });
+
+        const checkCapabilities = () => {
+            //TODO: TEST IF IT WORKS
+            const track = Quagga.CameraAccess.getActiveTrack();
+            let capabilities = {};
+            if (typeof track.getCapabilities === 'function') {
+                capabilities = track.getCapabilities();
+            }
+            applySettingsVisibility('torch', capabilities.torch);
+        };
+         Quagga.onProcessed(function(result) {
+            const drawingCtx = Quagga.canvas.ctx.overlay;
+            const drawingCanvas = Quagga.canvas.dom.overlay;
+        
+            if (result) {
+                if (result.boxes) {
+                    drawingCtx.clearRect(0, 0, parseInt(drawingCanvas.getAttribute("width")), parseInt(drawingCanvas.getAttribute("height")));
+                    result.boxes.filter(function (box) {
+                        return box !== result.box;
+                    }).forEach(function(box) {
+                        Quagga.ImageDebug.drawPath(box, {x: 0, y: 1}, drawingCtx, {color: "green", lineWidth: 2});
+                    });
+                }
+        
+                if (result.box) {
+                    Quagga.ImageDebug.drawPath(result.box, {x: 0, y: 1}, drawingCtx, {color: "#00F", lineWidth: 2});
+                }
+        
+                if (result.codeResult && result.codeResult.code) {
+                    Quagga.ImageDebug.drawPath(result.line, {x: 'x', y: 'y'}, drawingCtx, {color: 'red', lineWidth: 3});
+                }
+            }
+        });
+
+
+        const applySettingsVisibility = (setting, capability) => {
+            // depending on type of capability
+            if (typeof capability === 'boolean') {
+                const node = document.querySelector('input[name="settings_' + setting + '"]');
+                if (node) {
+                    node.parentNode.style.display = capability ? 'block' : 'none';
+                }
+                return;
+            }
+            if (window.MediaSettingsRange && capability instanceof window.MediaSettingsRange) {
+                const node = document.querySelector('select[name="settings_' + setting + '"]');
+                if (node) {
+                    // TODO: MAKE THIS WORK
+                    //this.updateOptionsForMediaRange(node, capability);
+                    node.parentNode.style.display = 'block';
+                }
+                return;
+            }
+        }
+        
+        Quagga.onDetected(function(result) {
+            //let code = result.codeResult.code;
+            // if (App.lastResult !== code) {
+            // }
+            console.log(result);
         });
     }
 
     render() {
         return (
             <section id="container" className="container">
-                <h3>The user's camera</h3>
-                <p>If your platform supports the <strong>getUserMedia</strong> API call, you can try the real-time locating and decoding features.
-                    Simply allow the page to access your web-cam and point it to a barcode. You can switch between <strong>Code128</strong>
-                    and <strong>EAN</strong> to test different scenarios.
-                    It works best if your camera has built-in auto-focus.
-                </p>
                 <div className="controls">
-                    <fieldset className="input-group">
-                        <button className="stop">Stop</button>
-                    </fieldset>
                     <fieldset className="reader-config-group">
-
                         <span>Barcode-Type</span>
                         <select name="decoder_readers">
                             <option value="code_128">Code 128</option>
@@ -90,55 +161,17 @@ class Scanner extends Component {
                             <option value="2of5">Standard 2 of 5</option>
                             <option value="code_93">Code 93</option>
                         </select>
-
-                        <span>Resolution (width)</span>
-                        <select name="input-stream_constraints">
-                            <option value="320x240">320px</option>
-                            <option value="640x480">640px</option>
-                            <option value="800x600">800px</option>
-                            <option value="1280x720">1280px</option>
-                            <option value="1600x960">1600px</option>
-                            <option value="1920x1080">1920px</option>
-                        </select>
-
-                        <span>Patch-Size</span>
-                        <select name="locator_patch-size">
-                            <option value="x-small">x-small</option>
-                            <option value="small">small</option>
-                            <option value="medium">medium</option>
-                            <option value="large">large</option>
-                            <option value="x-large">x-large</option>
-                        </select>
-
-                        <span>Half-Sample</span>
-                        <input type="checkbox" name="locator_half-sample" />
-
-                        <span>Workers</span>
-                        <select name="numOfWorkers">
-                            <option value="0">0</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="4">4</option>
-                            <option value="8">8</option>
-                        </select>
-
                         <span>Camera</span>
                         <select name="input-stream_constraints" id="deviceSelection">
                         </select>
-
-                        <span>Zoom</span>
-                        <select name="settings_zoom"></select>
-
                         <span>Torch</span>
                         <input type="checkbox" name="settings_torch" />
-
                     </fieldset>
                 </div>
-                <div id="result_strip">
-                    <ul className="thumbnails"></ul>
-                    <ul className="collector"></ul>
-                </div>
                 <div id="interactive" className="viewport"></div>
+                <fieldset className="input-group">
+                    <button className="stop">Stop</button>
+                </fieldset>
             </section>
         );
     }
