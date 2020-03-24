@@ -170,7 +170,7 @@ class Scanner extends Component {
                 </div>
                 <div id="interactive" className="viewport"></div>
                 <fieldset className="input-group">
-                    <button className="stop">Stop</button>
+                    <button onClick={this.props.toggleScanner} className="stop">Stop</button>
                 </fieldset>
             </section>
         );
