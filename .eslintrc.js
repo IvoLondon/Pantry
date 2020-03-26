@@ -22,6 +22,7 @@ module.exports = {
     'react'
   ],
   rules: {
+    "one-var": ["error", "consecutive"],
     "indent": ["warn", 4, {"SwitchCase": 1}],
     "no-debugger": "error",
     "array-callback-return": "warn",
@@ -30,7 +31,9 @@ module.exports = {
     "no-shadow": "error",
     "camelcase": "warn",
     "quotes": [ "warn", "single" ],
+    "object-curly-spacing": ["error", "always"],
     "space-before-function-paren": ["error", "never"],
+    "no-multiple-empty-lines": ["error", { "max": 2, "maxBOF": 1, "maxEOF": 1}],
     "react/jsx-uses-react": "warn",
     "react/jsx-uses-vars": "warn",
   }
