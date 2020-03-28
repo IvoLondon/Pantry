@@ -1,6 +1,17 @@
 import React, { Component } from 'react';
 import * as Quagga from './quagga';
-import { cameraState, inputMapper, checkCapabilities } from './utilities';
+import {
+    handleError,
+    cameraState,
+    inputMapper,
+    checkCapabilities
+} from './utilities';
+import {
+    Dialog,
+    Box,
+    IconButton
+} from '@material-ui/core';
+import CloseIcon from '@material-ui/icons/Close';
 
 import './style.scss';
 
@@ -9,49 +20,49 @@ class Scanner extends Component {
         ...cameraState
     }
 
-    componentDidMount() {
+    onEntered = () => {
         this.init();
+    }
+
+    onExit = () => {
+        Quagga.stop();
     }
 
     componentDidUpdate(prevProps, prevState) {
         Object.entries(this.props).forEach(([key, val]) =>
-          prevProps[key] !== val && console.log(`Prop '${key}' changed`)
+            prevProps[key] !== val && console.log(`Prop '${key}' changed`)
         );
         if (this.state) {
-          Object.entries(this.state).forEach(([key, val]) =>
-            prevState[key] !== val && console.log(`State '${key}' changed`)
-          );
+            Object.entries(this.state).forEach(([key, val]) =>
+                prevState[key] !== val && console.log(`State '${key}' changed`)
+            );
         }
-
-        this.init();
     }
 
-    init() {
+    init = () => {
         const App = this;
-        debugger
+        this.initCameraSelection();
         Quagga.init({ ...App.state }, function(err) {
             if (err) {
-                return App.handleError(err);
+                return handleError(err);
             }
-            debugger
             console.log(App.state);
             Quagga.registerResultCollector(resultCollector);
-            App.initCameraSelection();
             checkCapabilities();
             Quagga.start();
         });
 
 
         const resultCollector = Quagga.ResultCollector.create({
-                capture: true,
-                capacity: 5,
-                filter: function(codeResult) {
+            capture: true,
+            capacity: 5,
+            filter: function(codeResult) {
                 // only store results which match this constraint
                 // e.g.: codeResult
                 // TODO: get objects
-                    return true;
-                }
-            });
+                return true;
+            }
+        });
 
         Quagga.onProcessed(function(result) {
             const drawingCtx = Quagga.canvas.ctx.overlay,
@@ -85,10 +96,6 @@ class Scanner extends Component {
         });
     }
 
-    handleError = (err) => {
-        console.log(err);
-    }
-
     closeCamera = (e) => {
         e.preventDefault();
         Quagga.stop();
@@ -113,64 +120,44 @@ class Scanner extends Component {
         });
     };
 
-    // setCameraState = (path, value) => {
-    //     if (typeof this.accessByPath(inputMapper, path) === 'function') {
-    //         value = this.accessByPath(inputMapper, path)(value);
-    //     }
-        
-    //     if (path.startsWith('settings.')) {
-    //         const setting = path.substring(9);
-    //         return this.applySetting(setting, value);
-    //     }
-
-
-    //     this.accessByPath(inputMapper, path, value);
-    //     console.log(JSON.stringify(this.state));
-    //     console.log(value);
-    //     this.setState({
-    //         ...this.state,
-    //         decoder: {
-    //             readers: {
-    //                 format: value
-    //             }
-    //         }
-    //     });
-    //     Quagga.stop();
-    //     // this.init();
-    // };
-
     setCameraState = (path, value) => {
-        var self = this;
-        // TODO: Update to use setState
-
-        if (typeof self.accessByPath(inputMapper, path) === "function") {
-            value = self.accessByPath(inputMapper, path)(value);
+        if (typeof this.accessByPath(inputMapper, path) === 'function') {
+            value = this.accessByPath(inputMapper, path)(value);
         }
 
         if (path.startsWith('settings.')) {
-            var setting = path.substring(9);
-            return self.applySetting(setting, value);
+            const setting = path.substring(9);
+            return this.applySetting(setting, value);
         }
-        self.accessByPath(self.state, path, value);
-
-        console.log(JSON.stringify(self.state));
-        Quagga.stop();
-        this.init();
+        const newState = this.accessByPath(this.state, path, value);
+        this.setState({
+            ...this.state,
+            ...newState
+        }, () => {
+            Quagga.stop();
+            this.init();
+        });
     };
 
     accessByPath = (obj, path, val) => {
         const parts = path.split('.'),
-            depth = parts.length,
             setter = (typeof val !== 'undefined');
 
-        return parts.reduce(function(o, key, i) {
-            if (setter && (i + 1) === depth) {
-                if (typeof o[key] === 'object' && typeof val === 'object') {
-                    Object.assign(o[key], val);
-                } else {
-                    o[key] = val;
-                }
+        if (setter) {
+            let newState;
+            if (typeof obj[parts[0]] === 'object' && typeof val === 'object') {
+                newState = { ...obj };
+                // TODO : Improve mutation
+                newState[parts[0]] = { ...obj[parts[0]] };
+                newState[parts[0]][parts[1]] = [...newState[parts[0]][parts[1]]];
+                newState[parts[0]][parts[1]][0] = val[0];
+            } else {
+                throw new Error('Error with new value');
             }
+            return newState;
+        }
+
+        return parts.reduce(function(o, key, i) {
             return key in o ? o[key] : {};
         }, obj);
     };
@@ -210,38 +197,47 @@ class Scanner extends Component {
 
     render() {
         return (
-            <section id="container" className="container">
-                <div className="controls">
-                    <fieldset className="reader-config-group">
-                        <span>Barcode-Type</span>
-                        <select onChange={this.changeState} name="decoder_readers">
-                            <option value="code_128">Code 128</option>
-                            <option value="code_39">Code 39</option>
-                            <option value="code_39_vin">Code 39 VIN</option>
-                            <option value="ean">EAN</option>
-                            <option value="ean_extended">EAN-extended</option>
-                            <option value="ean_8">EAN-8</option>
-                            <option value="upc">UPC</option>
-                            <option value="upc_e">UPC-E</option>
-                            <option value="codabar">Codabar</option>
-                            <option value="i2of5">Interleaved 2 of 5</option>
-                            <option value="2of5">Standard 2 of 5</option>
-                            <option value="code_93">Code 93</option>
-                        </select>
-                        <span>Camera</span>
-                        <select onChange={this.changeState} name="input-stream_constraints" id="deviceSelection">
-                        </select>
-                        <div id="torch" style={{ display: 'none' }}>
-                            <span>Torch</span>
-                            <input onChange={this.changeState} type="checkbox" name="settings_torch" />
+            <div>
+                <Dialog
+                    open={this.props.showScanner}
+                    onEntered={this.init}
+                >
+                    <Box className="Scanner">
+                        <div className="controls">
+                            <fieldset className="reader-config-group">
+                                <span>Barcode-Type</span>
+                                <select onChange={this.changeState} name="decoder_readers">
+                                    <option value="code_128">Code 128</option>
+                                    <option value="code_39">Code 39</option>
+                                    <option value="code_39_vin">Code 39 VIN</option>
+                                    <option value="ean">EAN</option>
+                                    <option value="ean_extended">EAN-extended</option>
+                                    <option value="ean_8">EAN-8</option>
+                                    <option value="upc">UPC</option>
+                                    <option value="upc_e">UPC-E</option>
+                                    <option value="codabar">Codabar</option>
+                                    <option value="i2of5">Interleaved 2 of 5</option>
+                                    <option value="2of5">Standard 2 of 5</option>
+                                    <option value="code_93">Code 93</option>
+                                </select>
+                                <span>Camera</span>
+                                <select onChange={this.changeState} name="input-stream_constraints" id="deviceSelection">
+                                </select>
+                                <div id="torch" style={{ display: 'none' }}>
+                                    <span>Torch</span>
+                                    <input onChange={this.changeState} type="checkbox" name="settings_torch" />
+                                </div>
+                            </fieldset>
                         </div>
-                    </fieldset>
-                </div>
-                <div id="interactive" className="viewport"></div>
-                <fieldset className="input-group">
-                    <button onClick={this.closeCamera} id="stop-button" className="stop">Stop</button>
-                </fieldset>
-            </section>
+                        <div id="interactive" className="viewport"></div>
+                        <fieldset className="input-group-close">
+                            <IconButton onClick={this.closeCamera} color="inherit" size="large" aria-label="close scanner">
+                                <CloseIcon />
+                            </IconButton>
+                        </fieldset>
+                    </Box>
+                </Dialog>
+            </div>
         );
     }
 }

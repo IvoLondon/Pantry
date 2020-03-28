@@ -1,5 +1,9 @@
 import * as Quagga from './quagga';
 
+export const handleError = (err) => {
+    console.log(err);
+};
+
 export const cameraState = {
     inputStream: {
         type: 'LiveStream',
@@ -94,6 +98,5 @@ const applySettingsVisibility = (setting, capability = false) => {
         if (node) {
             node.parentNode.style.display = capability ? 'block' : 'none';
         }
-        return;
     }
 };
