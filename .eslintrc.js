@@ -32,7 +32,7 @@ module.exports = {
     "camelcase": "warn",
     "quotes": [ "warn", "single" ],
     "object-curly-spacing": ["error", "always"],
-    "space-before-function-paren": ["error", "never"],
+    "space-before-function-paren": ["error", {"anonymous": "always", "named": "never", "asyncArrow": "always"}],
     "no-multiple-empty-lines": ["error", { "max": 2, "maxBOF": 1, "maxEOF": 1}],
     "react/jsx-uses-react": "warn",
     "react/jsx-uses-vars": "warn",

@@ -4,7 +4,7 @@ export const handleError = (err) => {
     console.log(err);
 };
 
-export const storeCodes = [
+export const initStoreCodes = [
     {
         code: 'ean_8',
         label: 'Sainsburys'
@@ -104,25 +104,6 @@ export const inputMapper = {
                 format: value + '_reader',
                 config: {}
             }];
-        }
-    }
-};
-
-export const checkCapabilities = () => {
-    const track = Quagga.CameraAccess.getActiveTrack();
-    let capabilities = {};
-    if (typeof track.getCapabilities === 'function') {
-        capabilities = track.getCapabilities();
-    }
-    applySettingsVisibility('torch', capabilities.torch);
-};
-
-const applySettingsVisibility = (setting, capability = false) => {
-    // depending on type of capability
-    if (typeof capability === 'boolean') {
-        const node = document.querySelector('input[name="settings_' + setting + '"]');
-        if (node) {
-            node.parentNode.style.display = capability ? 'block' : 'none';
         }
     }
 };

@@ -1,32 +1,39 @@
 import React, { Component } from 'react';
 import * as Quagga from './quagga';
 import {
-    storeCodes,
+    initStoreCodes,
     initCameraState,
     handleError,
-    inputMapper,
-    checkCapabilities
+    inputMapper
 } from './utilities';
 import { whatUpdated } from './../../utilities';
 import {
     Dialog,
     Box,
+    Grid,
     MenuItem,
     IconButton,
     InputLabel,
     FormControl,
     Select
 } from '@material-ui/core';
+import { withStyles } from '@material-ui/core/styles';
 import CloseIcon from '@material-ui/icons/Close';
 import FlipCameraIosIcon from '@material-ui/icons/FlipCameraIos';
+import WbIncandescentIcon from '@material-ui/icons/WbIncandescent';
 
 import './style.scss';
 
+
 class Scanner extends Component {
     state = {
+        storeCodes: [...initStoreCodes],
+        selectedStore: initStoreCodes[0].code,
+        camerasList: [],
+        activeCamera: 0,
         cameraState: { ...initCameraState },
-        storeCodes: [...storeCodes],
-        selectedStore: storeCodes[0].code
+        torchExists: false,
+        torchState: false
     }
 
     onEntered = () => {
@@ -44,12 +51,13 @@ class Scanner extends Component {
     init = () => {
         const App = this;
         this.initCameraSelection();
-        Quagga.init({ ...App.state.cameraState }, function(err) {
+
+        Quagga.init({ ...App.state.cameraState }, function (err) {
             if (err) {
                 return handleError(err);
             }
             Quagga.registerResultCollector(resultCollector);
-            checkCapabilities();
+            App.checkCapabilities();
             Quagga.start();
         });
 
@@ -57,7 +65,7 @@ class Scanner extends Component {
         const resultCollector = Quagga.ResultCollector.create({
             capture: true,
             capacity: 5,
-            filter: function(codeResult) {
+            filter: function (codeResult) {
                 // only store results which match this constraint
                 // e.g.: codeResult
                 // TODO: get objects
@@ -65,16 +73,16 @@ class Scanner extends Component {
             }
         });
 
-        Quagga.onProcessed(function(result) {
+        Quagga.onProcessed(function (result) {
             const drawingCtx = Quagga.canvas.ctx.overlay,
                 drawingCanvas = Quagga.canvas.dom.overlay;
 
             if (result) {
                 if (result.boxes) {
                     drawingCtx.clearRect(0, 0, parseInt(drawingCanvas.getAttribute('width')), parseInt(drawingCanvas.getAttribute('height')));
-                    result.boxes.filter(function(box) {
+                    result.boxes.filter(function (box) {
                         return box !== result.box;
-                    }).forEach(function(box) {
+                    }).forEach(function (box) {
                         Quagga.ImageDebug.drawPath(box, { x: 0, y: 1 }, drawingCtx, { color: 'green', lineWidth: 2 });
                     });
                 }
@@ -89,7 +97,7 @@ class Scanner extends Component {
             }
         });
 
-        Quagga.onDetected(function(result) {
+        Quagga.onDetected(function (result) {
             // let code = result.codeResult.code;
             // if (App.lastResult !== code) {
             // }
@@ -103,12 +111,25 @@ class Scanner extends Component {
     };
 
     convertNameToState = (name) => {
-        return name.replace('_', '.').split('-').reduce(function(result, value) {
+        return name.replace('_', '.').split('-').reduce(function (result, value) {
             return result + value.charAt(0).toUpperCase() + value.substring(1);
         });
     };
 
+    checkCapabilities = () => {
+        const track = Quagga.CameraAccess.getActiveTrack();
+        let capabilities = {};
+        if (typeof track.getCapabilities === 'function') {
+            capabilities = track.getCapabilities();
+        }
+        console.log('Torch ', capabilities.torch);
+        this.setState({
+            torchExists: !!capabilities.torch
+        });
+    }
+
     changeState = (e) => {
+        // TODO:  REMOVE WHEN ALL WIRED
         this.initCameraSelection();
         e.preventDefault();
 
@@ -118,7 +139,6 @@ class Scanner extends Component {
             state = this.convertNameToState(name);
         console.log(`Value of ${state} changed to ${value}`);
         this.setCameraState(state, value);
-        //this.initCameraSelection();
     };
 
     setBarcode = (e) => {
@@ -134,15 +154,42 @@ class Scanner extends Component {
         });
     }
 
+    setCamera = (e) => {
+        e.preventDefault();
+        const camerasList = this.state.camerasList;
+        let activeCameraNum = this.state.activeCamera + 1;
+        if (activeCameraNum >= camerasList.length) {
+            activeCameraNum = 0;
+        }
+        const value = camerasList[activeCameraNum].deviceId || camerasList[activeCameraNum].id,
+            name = 'input-stream_constraints',
+            state = this.convertNameToState(name);
+        this.setCameraState(state, value);
+
+        this.setState({
+            activeCamera: activeCameraNum
+        });
+    }
+
+    setTorch = () => {
+        const value = !this.state.torchState;
+        if (this.state.torchExists) {
+            this.setState({
+                torchState: value
+            });
+            return this.applySetting('torch', value);
+        } else {
+            this.setState({
+                torchState: false
+            });
+        }
+    }
+
     setCameraState = (path, value) => {
         if (typeof this.accessByPath(inputMapper, path) === 'function') {
             value = this.accessByPath(inputMapper, path)(value);
         }
 
-        if (path.startsWith('settings.')) {
-            const setting = path.substring(9);
-            return this.applySetting(setting, value);
-        }
         const newState = this.accessByPath(this.state.cameraState, path, value);
         this.setState({
             ...this.state,
@@ -160,19 +207,33 @@ class Scanner extends Component {
 
         if (setter) {
             let newState;
-            if (typeof obj[parts[0]] === 'object' && typeof val === 'object') {
-                newState = { ...obj };
-                // TODO : Improve mutation
-                newState[parts[0]] = { ...obj[parts[0]] };
-                newState[parts[0]][parts[1]] = [...newState[parts[0]][parts[1]]];
-                newState[parts[0]][parts[1]][0] = val[0];
+            if (parts[0] === 'inputStream') {
+                newState = {
+                    ...this.state.cameraState,
+                    inputStream: {
+                        ...this.state.cameraState.inputStream,
+                        constraints: {
+                            ...this.state.cameraState.inputStream.constraints,
+                            facingMode: this.state.activeCamera ? 'environment' : 'user',
+                            devideId: val.deviceId
+                        }
+                    }
+                };
             } else {
-                throw new Error('Error with new value');
+                if (typeof obj[parts[0]] === 'object' && typeof val === 'object') {
+                    newState = { ...obj };
+                    // TODO : Improve mutation
+                    newState[parts[0]] = { ...obj[parts[0]] };
+                    newState[parts[0]][parts[1]] = [...newState[parts[0]][parts[1]]];
+                    newState[parts[0]][parts[1]][0] = val[0];
+                } else {
+                    throw new Error('Error with new value');
+                }
             }
             return newState;
         }
 
-        return parts.reduce(function(o, key, i) {
+        return parts.reduce(function (o, key, i) {
             return key in o ? o[key] : {};
         }, obj);
     };
@@ -189,29 +250,16 @@ class Scanner extends Component {
 
 
     initCameraSelection = () => {
-        const streamLabel = Quagga.CameraAccess.getActiveStreamLabel();
+        const streamLabel = Quagga.CameraAccess.getActiveStreamLabel(),
+            App = this;
 
         return Quagga.CameraAccess.enumerateVideoDevices()
-            .then(function(devices) {
-                function pruneText(text) {
-                    return text.length > 30 ? text.substr(0, 30) : text;
-                }
-                const $deviceSelection = document.getElementById('deviceSelection');
-                while ($deviceSelection.firstChild) {
-                    $deviceSelection.removeChild($deviceSelection.firstChild);
-                }
-                devices.forEach(function(device) {
-                    const $option = document.createElement('option');
-                    $option.value = device.deviceId || device.id;
-                    $option.appendChild(document.createTextNode(pruneText(device.label || device.deviceId || device.id)));
-                    $option.selected = streamLabel === device.label;
-                    $deviceSelection.appendChild($option);
+            .then(function (devices) {
+                App.setState({
+                    ...App.state,
+                    camerasList: devices
                 });
             });
-    }
-
-    setCamera = () => {
-
     }
 
     getStoreCodes = (stores) => {
@@ -232,27 +280,34 @@ class Scanner extends Component {
                     <Box className="Scanner">
                         <div id="interactive" className="viewport"></div>
                         <fieldset className="controls">
-                            <FormControl fullWidth>
-                                <InputLabel id="store-dropdown-label">Select your store:</InputLabel>
-                                <Select
-                                    labelId="store-dropdown-label"
-                                    id="store-dropdown"
-                                    name="decoder_readers"
-                                    value={this.state.selectedStore}
-                                    onChange={this.setBarcode}
-                                >
-                                    {this.getStoreCodes(this.state.storeCodes)}
-                                </Select>
-                            </FormControl>
-                            <select onChange={this.changeState} name="input-stream_constraints" id="deviceSelection">
-                            </select>
-                            <IconButton onClick={this.setCamera} color="info" size="medium" aria-label="close scanner">
-                                <FlipCameraIosIcon />
-                            </IconButton>
-                            <div id="torch" style={{ display: 'none' }}>
-                                <span>Torch</span>
-                                <input onChange={this.changeState} type="checkbox" name="settings_torch" />
-                            </div>
+                            <Grid container spacing={1}>
+                                <Grid item xs={10}>
+                                    <FormControl fullWidth>
+                                        <InputLabel id="store-dropdown-label">Select your store:</InputLabel>
+                                        <Select
+                                            labelId="store-dropdown-label"
+                                            id="store-dropdown"
+                                            name="decoder_readers"
+                                            value={this.state.selectedStore}
+                                            onChange={this.setBarcode}
+                                        >
+                                            {this.getStoreCodes(this.state.storeCodes)}
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
+                                <Grid item xs={2}>
+                                    <Grid item xs={12}>
+                                        <IconButton disabled={!this.state.torchExists} onClick={this.setTorch} color="inherit" size="medium" aria-label="toggle torch">
+                                            <WbIncandescentIcon />
+                                        </IconButton>
+                                    </Grid>
+                                    <Grid item xs={12}>
+                                        <IconButton disabled={this.state.camerasList.length < 2} onClick={this.setCamera} color="inherit" size="medium" aria-label="close scanner">
+                                            <FlipCameraIosIcon />
+                                        </IconButton>
+                                    </Grid>
+                                </Grid>
+                            </Grid>
                         </fieldset>
                         <fieldset className="input-group-close">
                             <IconButton onClick={this.closeCamera} color="inherit" size="medium" aria-label="close scanner">
@@ -266,4 +321,13 @@ class Scanner extends Component {
     }
 }
 
-export default Scanner;
+const customSelectColors = {
+    root: {
+        color: 'white'
+    },
+    filled: {
+        color: 'white',
+    }
+};
+
+export default withStyles(customSelectColors)(Scanner);
