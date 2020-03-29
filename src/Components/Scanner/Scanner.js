@@ -1,23 +1,32 @@
 import React, { Component } from 'react';
 import * as Quagga from './quagga';
 import {
+    storeCodes,
+    initCameraState,
     handleError,
-    cameraState,
     inputMapper,
     checkCapabilities
 } from './utilities';
+import { whatUpdated } from './../../utilities';
 import {
     Dialog,
     Box,
-    IconButton
+    MenuItem,
+    IconButton,
+    InputLabel,
+    FormControl,
+    Select
 } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
+import FlipCameraIosIcon from '@material-ui/icons/FlipCameraIos';
 
 import './style.scss';
 
 class Scanner extends Component {
     state = {
-        ...cameraState
+        cameraState: { ...initCameraState },
+        storeCodes: [...storeCodes],
+        selectedStore: storeCodes[0].code
     }
 
     onEntered = () => {
@@ -29,24 +38,16 @@ class Scanner extends Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
-        Object.entries(this.props).forEach(([key, val]) =>
-            prevProps[key] !== val && console.log(`Prop '${key}' changed`)
-        );
-        if (this.state) {
-            Object.entries(this.state).forEach(([key, val]) =>
-                prevState[key] !== val && console.log(`State '${key}' changed`)
-            );
-        }
+        whatUpdated(prevProps, prevState, this.props, this.state);
     }
 
     init = () => {
         const App = this;
         this.initCameraSelection();
-        Quagga.init({ ...App.state }, function(err) {
+        Quagga.init({ ...App.state.cameraState }, function(err) {
             if (err) {
                 return handleError(err);
             }
-            console.log(App.state);
             Quagga.registerResultCollector(resultCollector);
             checkCapabilities();
             Quagga.start();
@@ -94,13 +95,18 @@ class Scanner extends Component {
             // }
             console.log(result);
         });
-    }
+    };
 
     closeCamera = (e) => {
         e.preventDefault();
-        Quagga.stop();
         this.props.toggleScanner();
-    }
+    };
+
+    convertNameToState = (name) => {
+        return name.replace('_', '.').split('-').reduce(function(result, value) {
+            return result + value.charAt(0).toUpperCase() + value.substring(1);
+        });
+    };
 
     changeState = (e) => {
         this.initCameraSelection();
@@ -112,13 +118,21 @@ class Scanner extends Component {
             state = this.convertNameToState(name);
         console.log(`Value of ${state} changed to ${value}`);
         this.setCameraState(state, value);
+        //this.initCameraSelection();
     };
 
-    convertNameToState = (name) => {
-        return name.replace('_', '.').split('-').reduce(function(result, value) {
-            return result + value.charAt(0).toUpperCase() + value.substring(1);
+    setBarcode = (e) => {
+        e.preventDefault();
+        const $target = e.target,
+            value = $target.value,
+            name = 'decoder_readers',
+            state = this.convertNameToState(name);
+        console.log(`Value of ${state} changed to ${value}`);
+        this.setCameraState(state, value);
+        this.setState({
+            selectedStore: e.target.value
         });
-    };
+    }
 
     setCameraState = (path, value) => {
         if (typeof this.accessByPath(inputMapper, path) === 'function') {
@@ -129,11 +143,12 @@ class Scanner extends Component {
             const setting = path.substring(9);
             return this.applySetting(setting, value);
         }
-        const newState = this.accessByPath(this.state, path, value);
+        const newState = this.accessByPath(this.state.cameraState, path, value);
         this.setState({
             ...this.state,
-            ...newState
+            cameraState: { ...newState }
         }, () => {
+            console.log(this.state);
             Quagga.stop();
             this.init();
         });
@@ -195,6 +210,18 @@ class Scanner extends Component {
             });
     }
 
+    setCamera = () => {
+
+    }
+
+    getStoreCodes = (stores) => {
+        return stores.map(store => {
+            return (
+                <MenuItem key={store.code} value={store.code}>{store.label}</MenuItem>
+            );
+        });
+    }
+
     render() {
         return (
             <div>
@@ -203,35 +230,32 @@ class Scanner extends Component {
                     onEntered={this.init}
                 >
                     <Box className="Scanner">
-                        <div className="controls">
-                            <fieldset className="reader-config-group">
-                                <span>Barcode-Type</span>
-                                <select onChange={this.changeState} name="decoder_readers">
-                                    <option value="code_128">Code 128</option>
-                                    <option value="code_39">Code 39</option>
-                                    <option value="code_39_vin">Code 39 VIN</option>
-                                    <option value="ean">EAN</option>
-                                    <option value="ean_extended">EAN-extended</option>
-                                    <option value="ean_8">EAN-8</option>
-                                    <option value="upc">UPC</option>
-                                    <option value="upc_e">UPC-E</option>
-                                    <option value="codabar">Codabar</option>
-                                    <option value="i2of5">Interleaved 2 of 5</option>
-                                    <option value="2of5">Standard 2 of 5</option>
-                                    <option value="code_93">Code 93</option>
-                                </select>
-                                <span>Camera</span>
-                                <select onChange={this.changeState} name="input-stream_constraints" id="deviceSelection">
-                                </select>
-                                <div id="torch" style={{ display: 'none' }}>
-                                    <span>Torch</span>
-                                    <input onChange={this.changeState} type="checkbox" name="settings_torch" />
-                                </div>
-                            </fieldset>
-                        </div>
                         <div id="interactive" className="viewport"></div>
+                        <fieldset className="controls">
+                            <FormControl fullWidth>
+                                <InputLabel id="store-dropdown-label">Select your store:</InputLabel>
+                                <Select
+                                    labelId="store-dropdown-label"
+                                    id="store-dropdown"
+                                    name="decoder_readers"
+                                    value={this.state.selectedStore}
+                                    onChange={this.setBarcode}
+                                >
+                                    {this.getStoreCodes(this.state.storeCodes)}
+                                </Select>
+                            </FormControl>
+                            <select onChange={this.changeState} name="input-stream_constraints" id="deviceSelection">
+                            </select>
+                            <IconButton onClick={this.setCamera} color="info" size="medium" aria-label="close scanner">
+                                <FlipCameraIosIcon />
+                            </IconButton>
+                            <div id="torch" style={{ display: 'none' }}>
+                                <span>Torch</span>
+                                <input onChange={this.changeState} type="checkbox" name="settings_torch" />
+                            </div>
+                        </fieldset>
                         <fieldset className="input-group-close">
-                            <IconButton onClick={this.closeCamera} color="inherit" size="large" aria-label="close scanner">
+                            <IconButton onClick={this.closeCamera} color="inherit" size="medium" aria-label="close scanner">
                                 <CloseIcon />
                             </IconButton>
                         </fieldset>

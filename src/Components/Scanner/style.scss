@@ -2,11 +2,6 @@
 
 .Scanner {
     position: relative;
-    .controls {
-        position: absolute;
-        top: 0;
-        left: 0;
-    }
     video {
         max-width: 100%;
         vertical-align: top;
@@ -18,16 +13,21 @@
         height: 100%;
         position: absolute;
     }
+    .controls,
     .input-group-close {
         left: 0;
-        bottom: 0;
         margin: 0;
         border:0;
         width: 100%;
         color: white;
-        text-align: center;
         position: absolute;
         box-sizing: border-box;
-        
+    }
+    .controls {
+        top: 0;       
+    }
+    .input-group-close {
+        bottom: 0;
+        text-align: center;
     }
 }

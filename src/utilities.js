@@ -1,9 +1,9 @@
-export const whatUpdated = (prevProps, prevState) => {
-    Object.entries(this.props).forEach(([key, val]) =>
+export const whatUpdated = (prevProps, prevState, props, state) => {
+    Object.entries(props).forEach(([key, val]) =>
         prevProps[key] !== val && console.log(`Prop '${key}' changed`)
     );
-    if (this.state) {
-        Object.entries(this.state).forEach(([key, val]) =>
+    if (state) {
+        Object.entries(state).forEach(([key, val]) =>
             prevState[key] !== val && console.log(`State '${key}' changed`)
         );
     }

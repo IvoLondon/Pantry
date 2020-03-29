@@ -31,8 +31,7 @@ class Header extends Component {
                         <Grid container direction="row" justify="center" alignItems="center">
                             <h1>Scan your can</h1>
                             <Scanner showScanner={this.state.showScanner} toggleScanner={this.toggleScanner} />
-                            <Button varian="contained" color="primary" onClick={this.toggleScanner}>Show camera</Button>
-                            <Input autoFocus={false} /><IconButton color="primary"><AddAPhotoIcon /></IconButton>
+                            <Input autoFocus={false} /><IconButton size="medium" color="primary" onClick={this.toggleScanner}><AddAPhotoIcon /></IconButton>
                         </Grid>
                     </Container>
                 </Box>
