@@ -24,7 +24,22 @@
         box-sizing: border-box;
     }
     .controls {
-        top: 0;       
+        top: 0;
+        background: rgb(0,0,0);
+        background: linear-gradient(180deg, rgba(0,0,0,0.74) 0%, rgba(0,0,0,0) 100%);
+        .store-dropdown-label {
+            color: white;
+        }
+        .store-dropdown {
+            color: white;
+            &:before,
+            &:after {
+                border-color: white;
+            }
+            svg {
+                color: white;
+            }   
+        }     
     }
     .input-group-close {
         bottom: 0;
