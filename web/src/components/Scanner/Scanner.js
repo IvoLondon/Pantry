@@ -230,7 +230,7 @@ class Scanner extends Component {
 
     applySetting = (setting, value) => {
         const track = Quagga.CameraAccess.getActiveTrack();
-        if (track && typeof track.getCapabilities === 'function') {
+        if (typeof track?.getCapabilities === 'function') {
             switch (setting) {
                 case 'torch':
                     return track.applyConstraints({ advanced: [{ torch: !!value }] });

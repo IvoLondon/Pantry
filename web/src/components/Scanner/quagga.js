@@ -4291,7 +4291,7 @@ function enumerateDevices() {
 };
 
 function getUserMedia(constraints) {
-    if (navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === 'function') {
+    if (navigator.mediaDevices && typeof navigator.mediaDevices?.getUserMedia === 'function') {
         return navigator.mediaDevices.getUserMedia(constraints);
     }
     return Promise.reject(new Error('getUserMedia is not defined'));
