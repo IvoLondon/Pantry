@@ -16,7 +16,7 @@ const itemSchema = new mongoose.Schema(
         },
         macros: {
             protein: {
-                type: Number,
+                type: Number
             },
             carb: {
                 total: {
@@ -34,7 +34,6 @@ const itemSchema = new mongoose.Schema(
                 unsaturated: Number,
                 trans: Number
             }
-            //TODO: DATE
         }
     }
 )

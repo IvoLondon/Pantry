@@ -3,7 +3,7 @@ import { json, urlencoded } from 'body-parser'; //TODO: CHECK
 import morgan from 'morgan';
 import cors from 'cors';
 
-import config from './config';
+import configs from './config/index';
 import { connect } from './utils/db';
 
 import itemRouter from './resources/item/item.router'
@@ -22,8 +22,8 @@ app.use('/api', itemRouter);
 export const start = async () => {
     try {
         await connect();
-        app.listen(config.port, () => {
-            console.log(`Server is listening to port ${config.port}`)
+        app.listen(configs.port, () => {
+            console.log(`Server is listening to port ${configs.port}`)
         })
     } catch (e) {
         console.log(e);

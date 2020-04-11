@@ -1,3 +1,3 @@
-export const config = {
-    dbUrl: 'mongodb://localhost:27017/pantry' //TODO: ADD VALID PROD URL
+export const configs = {
+    dbUrl: process.env.DB_URL, //TODO: ADD VALID PROD URL 
 }

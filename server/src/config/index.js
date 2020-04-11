@@ -1,4 +1,7 @@
 import { merge } from 'lodash'
+import { config } from 'dotenv';
+config();
+
 const env = process.env.NODE_ENV || 'development'
 
 const baseConfig = {
@@ -12,10 +15,10 @@ let envConfig = {}
 switch (env) {
     case 'dev':
     case 'development':
-        envConfig = require('./local').config;
+        envConfig = require('./local').configs;
         break;
     default:
-        envConfig = require('./prod').config;
+        envConfig = require('./prod').configs;
 }
 
 export default merge(baseConfig, envConfig);
