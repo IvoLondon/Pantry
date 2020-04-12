@@ -3,3 +3,6 @@ node_modules
 .cache
 *.log
 .DS_Store
+.env
+web/.env
+server/.env
