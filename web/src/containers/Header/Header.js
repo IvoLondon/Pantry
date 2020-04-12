@@ -14,7 +14,7 @@ import './styles.scss';
 
 class Header extends Component {
     state = {
-        showScanner: true
+        showScanner: false
     }
 
     toggleScanner = () => {

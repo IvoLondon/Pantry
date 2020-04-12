@@ -66,7 +66,7 @@ export const updateOne = model => async (req, res) => {
         const updatedDoc = await model
             .findOneAndUpdate(
             {
-                barcode: req.params.id
+                _id: req.params.id
             },
             req.body,
             { new: true }

@@ -22,7 +22,7 @@ module.exports = {
     'react'
   ],
   rules: {
-    "one-var": ["error", "consecutive"],
+    "one-var": ["error", { var: "never" }],
     "indent": ["warn", 4, {"SwitchCase": 1}],
     "no-debugger": "error",
     "array-callback-return": "warn",
