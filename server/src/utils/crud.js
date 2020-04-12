@@ -1,18 +1,39 @@
 export const getOne = model => async (req, res) => {
     try {
         const doc = await model
-            .findOne({ _id: req.params.id })
+            .findOne({ barcode: req.params.id })
             .lean()
             .exec()
   
         if (!doc) {
-            return res.status(400).end()
+            return res.status(400).send('Item does not exist').end()
         }
   
         res.status(200).json({ data: doc })
     } catch (e) {
         console.error(e)
         res.status(400).end()
+    }
+}
+
+export const getOneByField = model => async (req, res) => {
+    if(!Object.keys(req.body).length) {
+        res.status(400).end()
+    }
+    try {
+        const doc = await model
+            .findOne({ ...req.body })
+            .lean()
+            .exec()
+  
+        if (!doc) {
+            return res.status(400).send('Item does not exist').end()
+        }
+  
+        res.status(200).json({ data: doc })
+    } catch (e) {
+        console.error(e)
+        res.status(400).send({status: 400}).end()
     }
 }
   
@@ -31,22 +52,21 @@ export const getMany = model => async (req, res) => {
 }
   
 export const createOne = model => async (req, res) => {
-    console.log(req)
     try {
         const doc = await model.create({ ...req.body })
         res.status(201).json({ data: doc })
     } catch (e) {
         console.error(e)
-        res.status(400).end()
+        res.status(400).send({ status: 400, message: e.errmsg }).end()
     }
-  }
+}
   
 export const updateOne = model => async (req, res) => {
     try {
         const updatedDoc = await model
             .findOneAndUpdate(
             {
-                _id: req.params.id
+                barcode: req.params.id
             },
             req.body,
             { new: true }
@@ -68,7 +88,7 @@ export const updateOne = model => async (req, res) => {
 export const removeOne = model => async (req, res) => {
     try {
         const removed = await model.findOneAndRemove({
-            _id: req.params.id
+            barcode: req.params.id
         })
     
         if (!removed) {
@@ -87,6 +107,7 @@ export const crudControllers = model => ({
     updateOne: updateOne(model),
     getMany: getMany(model),
     getOne: getOne(model),
+    getOneByField: getOneByField(model),
     createOne: createOne(model)
 })
   
