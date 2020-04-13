@@ -54,14 +54,16 @@ const ItemList = () => {
         const currentList = [...items];
         const newList = currentList.filter(x => x._id !== item._id);
         const newItem = currentList.find(x => x._id === item._id);
+        const newItemIndex = currentList.findIndex(x => x._id === item._id);
+
         if (action === 'decr') {
             newItem.quantity--;
         } else if (action === 'incr') {
             newItem.quantity++;
         }
+        newList.splice(newItemIndex, 0, newItem);
         getItems([
-            ...newList,
-            newItem
+            ...newList
         ]);
 
         clearTimeout(actionTimer);
@@ -106,7 +108,7 @@ const ItemList = () => {
                     <List component="nav" className="ItemList" aria-label="main mailbox folders">
                         {itemsList}
                     </List>
-                    <Dialog open={modal}>
+                    <Dialog open={modal} onClose={toggleModal}>
                         <UpdateItemModal onClose={toggleModal} barcode={selectedItem} />
                     </Dialog>
                 </Grid>
