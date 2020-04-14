@@ -1,5 +1,4 @@
-import React, { Component } from 'react';
-import Scanner from '../../components/Scanner/Scanner';
+import React, { Component, lazy, Suspense } from 'react';
 import {
     Box,
     Container,
@@ -11,6 +10,7 @@ import {
 import AddAPhotoIcon from '@material-ui/icons/AddAPhoto';
 import './styles.scss';
 
+const Scanner = lazy(() => import('../../components/Scanner/Scanner'));
 
 class Header extends Component {
     state = {
@@ -30,7 +30,11 @@ class Header extends Component {
                     <Container maxWidth="md" >
                         <Grid container direction="row" justify="center" alignItems="center">
                             <h1>Scan your can</h1>
-                            <Scanner showScanner={this.state.showScanner} toggleScanner={this.toggleScanner} />
+                            <Suspense fallback={<h6>Loading...</h6>}>
+                                {this.state.showScanner ?
+                                    <Scanner showScanner={this.state.showScanner} toggleScanner={this.toggleScanner} />
+                                    : null }
+                            </Suspense>
                             <Input autoFocus={false} /><IconButton size="medium" color="primary" onClick={this.toggleScanner}><AddAPhotoIcon /></IconButton>
                         </Grid>
                     </Container>

@@ -14,6 +14,9 @@ const itemSchema = new mongoose.Schema(
         quantity: {
             type: Number
         },
+        calories: {
+            type: Number
+        },
         macros: {
             protein: {
                 type: Number

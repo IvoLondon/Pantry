@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import {
     Box,
     Container,
     Grid,
-    Dialog,
     Button,
     ButtonGroup
 } from '@material-ui/core';
@@ -18,7 +17,7 @@ import Badge from '@material-ui/core/Badge';
 import Divider from '@material-ui/core/Divider';
 import StoreIcon from '@material-ui/icons/Store';
 
-import UpdateItemModal from './../../components/UpdateItemModal/UpdateItemModal';
+import ItemModal from './../../components/ItemModal/ItemModal';
 import './styles.scss';
 
 const useStyles = makeStyles((theme) => ({
@@ -30,8 +29,8 @@ const useStyles = makeStyles((theme) => ({
 
 const ItemList = () => {
     const [items, getItems] = useState([]),
-    [selectedItem, setSelectedItem] = useState(false),
-    [modal, setModalState] = useState(false);
+        [selectedItem, setSelectedItem] = useState(null),
+        [modal, setModalState] = useState(false);
     let actionTimer;
 
     useEffect(() => {
@@ -44,9 +43,9 @@ const ItemList = () => {
             });
     }, []);
 
-    const toggleModal = (barcode) => {
-        if (!barcode) barcode = 0;
-        setSelectedItem(barcode);
+    const toggleModal = (item) => {
+        if (!item) item = null;
+        setSelectedItem(item);
         setModalState(!modal);
     };
 
@@ -88,7 +87,7 @@ const ItemList = () => {
                             <StoreIcon style={{ color: 'white' }} />
                         </Badge>
                     </ListItemIcon>
-                    <ListItemText primary={item.name} onClick={() => toggleModal(item.barcode)} />
+                    <ListItemText primary={item.name} onClick={() => toggleModal(item)} />
 
                     <ButtonGroup variant="contained" color="primary" aria-label="contained primary button group">
                         <Button onClick={() => updateItemQuantity(item, 'incr')}>+</Button>
@@ -108,9 +107,9 @@ const ItemList = () => {
                     <List component="nav" className="ItemList" aria-label="main mailbox folders">
                         {itemsList}
                     </List>
-                    <Dialog open={modal} onClose={toggleModal}>
-                        <UpdateItemModal onClose={toggleModal} barcode={selectedItem} />
-                    </Dialog>
+                    
+                        <ItemModal open={modal} onClose={toggleModal} selectedItem={selectedItem} />
+                      
                 </Grid>
             </Container>
         </Box>
