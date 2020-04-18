@@ -1,24 +1,24 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import {
     Box,
     Container,
     Grid,
     Button,
-    ButtonGroup
+    ButtonGroup,
+    List,
+    ListItem,
+    ListItemIcon,
+    ListItemText,
+    Badge,
+    Divider
 } from '@material-ui/core';
 
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-
-import Badge from '@material-ui/core/Badge';
-import Divider from '@material-ui/core/Divider';
 import StoreIcon from '@material-ui/icons/Store';
-
+import { requestGetItems, requestUpdateItem } from './../../crud';
 import ItemModal from './../../components/ItemModal/ItemModal';
 import './styles.scss';
+
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -34,18 +34,24 @@ const ItemList = () => {
     let actionTimer;
 
     useEffect(() => {
-        fetch(`${process.env.REACT_APP_SERVER}:${process.env.REACT_APP_SERVER_PORT}/api/item`)
-            .then(response => response.json())
+        fetchItemsList();
+    }, []);
+
+    const fetchItemsList = () => {
+        requestGetItems()
             .then(response => {
                 getItems(response.data);
             }, error => {
                 console.log(error);
             });
-    }, []);
+    };
 
     const toggleModal = (item) => {
-        if (!item) item = null;
-        setSelectedItem(item);
+        if (!item) {
+            setSelectedItem(null);
+        } else {
+            setSelectedItem(item);
+        }
         setModalState(!modal);
     };
 
@@ -65,16 +71,22 @@ const ItemList = () => {
             ...newList
         ]);
 
+        // TODO: Use a proper throttling function
         clearTimeout(actionTimer);
         actionTimer = setTimeout(() => {
             const options = {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ "quantity": newItem.quantity })
+                body: JSON.stringify({ quantity: newItem.quantity })
             };
             fetch(`${process.env.REACT_APP_SERVER}:${process.env.REACT_APP_SERVER_PORT}/api/item/${item._id}`, options)
                 .then(response => console.log(response.status));
         }, 2000);
+    };
+
+    const updateItemNutrition = async (item) => {
+        await requestUpdateItem(item._id, item);
+        fetchItemsList();
     };
 
     const classes = useStyles();
@@ -107,9 +119,11 @@ const ItemList = () => {
                     <List component="nav" className="ItemList" aria-label="main mailbox folders">
                         {itemsList}
                     </List>
-                    
-                        <ItemModal open={modal} onClose={toggleModal} selectedItem={selectedItem} />
-                      
+                    <ItemModal
+                        open={modal}
+                        selectedItem={selectedItem}
+                        onClose={toggleModal}
+                        onSaveChanges={updateItemNutrition} />
                 </Grid>
             </Container>
         </Box>

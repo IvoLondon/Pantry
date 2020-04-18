@@ -18,7 +18,7 @@ app.use(urlencoded({ extended: true }));
 app.use(morgan('dev'));
 
 app.use('/api', itemRouter);
-
+app.get('/', (req, res) => res.status(200).send('Works'));
 export const start = async () => {
     try {
         await connect();

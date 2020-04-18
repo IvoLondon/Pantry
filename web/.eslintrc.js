@@ -22,6 +22,7 @@ module.exports = {
     'react'
   ],
   rules: {
+    "no-prototype-builtins": "off",
     "one-var": ["error", { var: "never" }],
     "indent": ["warn", 4, {"SwitchCase": 1}],
     "no-debugger": "error",

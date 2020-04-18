@@ -24,6 +24,7 @@ import WbIncandescentIcon from '@material-ui/icons/WbIncandescent';
 import './style.scss';
 
 class Scanner extends Component {
+    lastCode;
     state = {
         storeCodes: [...initStoreCodes],
         selectedStore: initStoreCodes[0].code,
@@ -46,28 +47,23 @@ class Scanner extends Component {
         whatUpdated(prevProps, prevState, this.props, this.state);
     }
 
+    componentWillUnmount() {
+        console.log('componentWillUnmount ');
+        Quagga.stop();
+    }
+
     init = () => {
         const App = this;
-
         Quagga.init({ ...App.state.cameraState }, function (err) {
             if (err) {
                 return handleError(err);
             }
-            Quagga.registerResultCollector(resultCollector);
-            Quagga.start();
+            setTimeout(() => {
+                console.log('Start')
+                Quagga.start();
+            }, 1000);
             App.initCameraSelection();
             App.checkCapabilities();
-        });
-
-        const resultCollector = Quagga.ResultCollector.create({
-            capture: true,
-            capacity: 5,
-            filter: function (codeResult) {
-                // only store results which match this constraint
-                // e.g.: codeResult
-                // TODO: get objects
-                return true;
-            }
         });
 
         Quagga.onProcessed(function (result) {
@@ -94,12 +90,17 @@ class Scanner extends Component {
             }
         });
 
-        Quagga.onDetected(function (result) {
-            // let code = result.codeResult.code;
-            // if (App.lastResult !== code) {
-            // }
-            console.log(result);
-        });
+        const detectedHandler = (result) => {
+            const code = result?.codeResult?.code;
+            if (code !== App.lastCode) {
+                App.lastCode = code;
+                Quagga.stop();
+                Quagga.offDetected(detectedHandler);
+                if (result) App.props.onDetect(code);
+            }
+        };
+
+        Quagga.onDetected(detectedHandler);
     };
 
     closeCamera = (e) => {

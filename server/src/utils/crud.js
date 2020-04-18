@@ -4,9 +4,8 @@ export const getOne = model => async (req, res) => {
             .findOne({ barcode: req.params.id })
             .lean()
             .exec()
-  
         if (!doc) {
-            return res.status(400).send('Item does not exist').end()
+            return res.status(400).send({message: "Item does not exist"}).end()
         }
   
         res.status(200).json({ data: doc })
@@ -52,6 +51,7 @@ export const getMany = model => async (req, res) => {
 }
   
 export const createOne = model => async (req, res) => {
+    req.body
     try {
         const doc = await model.create({ ...req.body })
         res.status(201).json({ data: doc })
