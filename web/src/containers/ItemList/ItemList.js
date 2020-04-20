@@ -85,8 +85,12 @@ const ItemList = () => {
     };
 
     const updateItemNutrition = async (item) => {
-        await requestUpdateItem(item._id, item);
-        fetchItemsList();
+        try {
+            await requestUpdateItem(item._id, item);
+            fetchItemsList();
+        } catch (e) {
+            return new Error(e);
+        }
     };
 
     const classes = useStyles();

@@ -59,7 +59,6 @@ class Scanner extends Component {
                 return handleError(err);
             }
             setTimeout(() => {
-                console.log('Start')
                 Quagga.start();
             }, 1000);
             App.initCameraSelection();
@@ -105,7 +104,7 @@ class Scanner extends Component {
 
     closeCamera = (e) => {
         e.preventDefault();
-        this.props.toggleScanner();
+        this.props.hideScanner();
     };
 
     convertNameToState = (name) => {
@@ -195,7 +194,7 @@ class Scanner extends Component {
     accessByPath = (obj, path, val) => {
         const parts = path.split('.'),
             setter = (typeof val !== 'undefined');
-        //TODO: IMPROVE BIG TIME
+        // TODO: IMPROVE BIG TIME
         if (setter) {
             let newState;
             if (parts[0] === 'inputStream') {

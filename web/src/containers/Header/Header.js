@@ -1,4 +1,4 @@
-import React, { useState, lazy, Suspense } from 'react';
+import React, { lazy, Suspense, useReducer } from 'react';
 import {
     Box,
     Container,
@@ -16,60 +16,142 @@ import ResultModal from './../../components/ResultModal/ResultModal';
 
 const Scanner = lazy(() => import('../../components/Scanner/Scanner'));
 
+const SHOW_SCANNER = 'SHOW_SCANNER',
+    HIDE_SCANNER = 'HIDE_SCANNER',
+    ITEM_FOUND = 'ITEM_FOUND',
+    SCAN_AGAIN = 'SCAN_AGAIN',
+    CREATE_NEW = 'CREATE_NEW',
+    SHOW_NEW_ITEM_MODAL = 'SHOW_NEW_ITEM_MODAL',
+    HIDE_NEW_ITEM_MODAL = 'HIDE_NEW_ITEM_MODAL',
+    SHOW_RESULT_MODAL = 'SHOW_RESULT_MODAL',
+    HIDE_RESULT_MODAL = 'HIDE_RESULT_MODAL',
+    SHOW_UPDATE_ITEM_MODAL = 'SHOW_UPDATE_ITEM_MODAL',
+    HIDE_UPDATE_ITEM_MODAL = 'HIDE_UPDATE_ITEM_MODAL';
+
+const reducer = (state, action) => {
+    if (action.type === SHOW_SCANNER) {
+        return {
+            ...state,
+            showScanner: true
+        };
+    };
+
+    if (action.type === HIDE_SCANNER) {
+        return {
+            ...state,
+            showScanner: false
+        };
+    };
+
+    if (action.type === SHOW_RESULT_MODAL) {
+        return {
+            ...state,
+            showScanner: false,
+            showResultModal: true,
+            itemId: action.payload.itemId
+        };
+    };
+
+    if (action.type === HIDE_RESULT_MODAL) {
+        return {
+            ...state,
+            showResultModal: false
+        };
+    };
+
+    if (action.type === SHOW_UPDATE_ITEM_MODAL) {
+        return {
+            ...state,
+            showUpdateItemModal: true
+        };
+    };
+
+    if (action.type === HIDE_UPDATE_ITEM_MODAL) {
+        return {
+            ...state,
+            showUpdateItemModal: false
+        };
+    };
+
+    if (action.type === SHOW_NEW_ITEM_MODAL) {
+        return {
+            ...state,
+            showNewItemModal: true
+        };
+    };
+
+    if (action.type === HIDE_NEW_ITEM_MODAL) {
+        return {
+            ...state,
+            showNewItemModal: false
+        };
+    };
+
+    if (action.type === ITEM_FOUND) {
+        return {
+            ...state,
+            item: action.payload.data,
+            showUpdateItemModal: true,
+            showScanner: false
+        };
+    };
+
+    if (action.type === SCAN_AGAIN) {
+        return {
+            ...state,
+            showScanner: true,
+            showResultModal: false
+        };
+    };
+
+    if (action.type === CREATE_NEW) {
+        return {
+            ...state,
+            showNewItemModal: true,
+            showResultModal: false
+        };
+    };
+
+    return state;
+};
+
+const initialState = {
+    item: {},
+    itemId: 0,
+    showScanner: false,
+    showNewItemModal: false,
+    showResultModal: false,
+    showUpdateItemModal: false
+};
+
 const Header = () => {
-    const [item, getItem] = useState({});
-    const [scannerState, showScanner] = useState(false);
-    const [newItemModal, showNewItemModal] = useState(false);
-    const [resultModal, showResultModal] = useState(false);
-    const [updateItemModal, showUpdateItemModal] = useState(false);
-    const [itemId, getItemId] = useState(0);
+    const [state, dispatch] = useReducer(reducer, initialState);
 
     const checkForItem = async (scannedItem) => {
-        getItemId(+scannedItem);
         const fetchedItem = await requestSingleItem(+scannedItem);
         if (fetchedItem.data) {
-            getItem(fetchedItem.data);
-            toggleUpdateModal();
+            dispatch({ type: ITEM_FOUND, payload: { data: fetchedItem.data } });
         } else {
-            toggleResultModal();
+            dispatch({ type: SHOW_RESULT_MODAL, payload: { itemId: +scannedItem } });
         }
-        toggleScanner();
-    };
-
-    const onScanAgain = () => {
-        toggleResultModal();
-        toggleScanner();
-    };
-
-    const toggleScanner = () => {
-        showScanner(!scannerState);
-    };
-
-    const toggleNewItemModal = () => {
-        showNewItemModal(!newItemModal);
-    };
-
-    const toggleResultModal = () => {
-        showResultModal(!resultModal);
-    };
-
-    const toggleUpdateModal = () => {
-        showUpdateItemModal(!updateItemModal);
-    };
-
-    const onCreateNew = () => {
-        toggleResultModal();
-        toggleNewItemModal();
     };
 
     const createNewItem = async (newItem) => {
-        await requestCreateItem(newItem);
-        toggleNewItemModal();
+        try {
+            await requestCreateItem(newItem);
+            dispatch({ type: HIDE_NEW_ITEM_MODAL });
+        } catch (e) {
+            return new Error(e);
+        }
     };
 
     const updateItem = async (newItem) => {
-        await requestUpdateItem(newItem._id, newItem);
-        toggleUpdateModal();
+        try {
+            await requestUpdateItem(newItem._id, newItem);
+            dispatch({ type: HIDE_UPDATE_ITEM_MODAL });
+        } catch (e) {
+            return new Error(e);
+        }
     };
 
     return (
@@ -77,37 +159,36 @@ const Header = () => {
             <Box className="Header">
                 <Container maxWidth="md" >
                     <Grid container direction="row" justify="center" alignItems="center">
-                        <h1>Scan your can</h1>
-                        <HeaderControls toggleScanner={toggleScanner} />
+                        <HeaderControls showScanner={() => dispatch({ type: SHOW_SCANNER })} />
                         <Suspense fallback={<h6>Loading...</h6>}>
-                            {scannerState
+                            {state.showScanner
                                 ? <Scanner
-                                    showScanner={scannerState}
-                                    toggleScanner={toggleScanner}
+                                    showScanner={state.showScanner}
+                                    hideScanner={() => dispatch({ type: HIDE_SCANNER })}
                                     onDetect={checkForItem} />
                                 : null }
                         </Suspense>
-                        { newItemModal
+                        { state.showNewItemModal
                             ? <ItemModal
-                                open={newItemModal}
-                                itemId={itemId}
-                                onClose={toggleNewItemModal}
+                                open={state.showNewItemModal}
+                                itemId={state.itemId}
+                                onClose={() => dispatch({ type: HIDE_NEW_ITEM_MODAL })}
                                 onSaveChanges={createNewItem} />
                             : null }
-                        { updateItemModal
+                        { state.showUpdateItemModal
                             ? <ItemModal
-                                open={updateItemModal}
-                                selectedItem={item}
-                                onClose={toggleUpdateModal}
+                                open={state.showUpdateItemModal}
+                                selectedItem={state.item}
+                                onClose={() => dispatch({ type: HIDE_UPDATE_ITEM_MODAL })}
                                 onSaveChanges={updateItem} />
                             : null }
-                        { resultModal
+                        { state.showResultModal
                             ? <ResultModal
-                                open={resultModal}
-                                itemId={itemId}
-                                onScanAgain={onScanAgain}
-                                onClose={toggleResultModal}
-                                onCreateNew={onCreateNew} />
+                                open={state.showResultModal}
+                                itemId={state.itemId}
+                                onScanAgain={() => dispatch({ type: SCAN_AGAIN })}
+                                onClose={() => dispatch({ type: HIDE_RESULT_MODAL })}
+                                onCreateNew={() => dispatch({ type: CREATE_NEW })} />
                             : null }
                     </Grid>
                 </Container>

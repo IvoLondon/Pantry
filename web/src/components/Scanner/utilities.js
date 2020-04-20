@@ -1,5 +1,3 @@
-import * as Quagga from './quagga';
-
 export const handleError = (err) => {
     console.log(err);
 };
@@ -10,7 +8,7 @@ export const initStoreCodes = [
         label: 'Sainsburys'
     },
     {
-        code: 'ean_extended',
+        code: 'ean',
         label: 'Aldi'
     }
     // <select onChange={this.changeState} name="decoder_readers">
@@ -28,7 +26,7 @@ export const initStoreCodes = [
     //     <option value="code_93">Code 93</option>
     // </select>
 
-]
+];
 
 export const initCameraState = {
     inputStream: {
@@ -62,7 +60,7 @@ export const initCameraState = {
     frequency: 1,
     decoder: {
         readers: [{
-            format: 'ean_reader',
+            format: 'ean_8_reader',
             config: {}
         }]
     },
@@ -72,7 +70,7 @@ export const initCameraState = {
 
 export const inputMapper = {
     inputStream: {
-        constraints: function(value) {
+        constraints: function (value) {
             if (/^(\d+)x(\d+)$/.test(value)) {
                 const values = value.split('x');
                 return {
@@ -85,11 +83,12 @@ export const inputMapper = {
             };
         }
     },
-    numOfWorkers: function(value) {
+    numOfWorkers: function (value) {
         return parseInt(value);
     },
     decoder: {
-        readers: function(value) {
+        readers: function (value) {
+            debugger
             if (value === 'ean_extended') {
                 return [{
                     format: 'ean_reader',

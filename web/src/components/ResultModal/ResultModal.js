@@ -12,18 +12,18 @@ import './style.scss';
 const dividerStyle = makeStyles({
     root: {
         margin: '20px 0',
-        width: '100%',
+        width: '100%'
     }
 });
 
 const contentStyle = makeStyles({
     root: {
-        paddingBottom: '30px',
+        paddingBottom: '30px'
     }
 });
 
 const ResultModal = (props) => {
-    const classes = dividerStyle();
+    const dividerClasses = dividerStyle();
     const dialogClasses = contentStyle();
 
     return (
@@ -33,12 +33,12 @@ const ResultModal = (props) => {
                 <h3 className="result-modal__title">{props.itemId}</h3>
                 <Grid container direction="column" justify="center" alignItems="center">
                     <Button variant="contained" color="primary" onClick={props.onScanAgain}>Scan Again</Button>
-                    <Divider classes={{ root: classes.root }} />
+                    <Divider classes={{ root: dividerClasses.root }} />
                     <Button variant="contained" color="secondary" onClick={props.onCreateNew}>Add New</Button>
                 </Grid>
             </DialogContent>
         </Dialog>
-    )
-}
+    );
+};
 
 export default ResultModal;

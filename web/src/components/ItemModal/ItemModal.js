@@ -73,7 +73,7 @@ const ItemModal = (props) => {
         return { name, calories, ref };
     };
 
-    //TODO: render the data auto
+    // TODO: render the data auto
     const rows = [
         createData('Calories', item?.calories, 'calories'),
         createData('Protein', item?.macros?.protein, 'macros.protein'),
