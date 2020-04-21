@@ -1,4 +1,4 @@
-import React, { useState, useContext, useCallback } from 'react';
+import React, { useState, useContext } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import {
     Box,
@@ -63,8 +63,6 @@ const ItemList = () => {
             }
         }, 1000, false)();
     };
-
-    
 
     const updateItemNutrition = async (item) => {
         try {
