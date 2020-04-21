@@ -43,6 +43,11 @@ const ItemModal = (props) => {
                 setCreateMode(true);
             }
         }
+        return () => {
+            getItem(INITIAL_ITEM);
+            setEditMode(false);
+            setCreateMode(false);
+        };
     }, [props.open]);
 
     const updateField = (e) => {

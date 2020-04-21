@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useContext, useCallback } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import {
     Box,
@@ -13,9 +13,10 @@ import {
     Badge,
     Divider
 } from '@material-ui/core';
-
 import StoreIcon from '@material-ui/icons/Store';
-import { requestGetItems, requestUpdateItem } from './../../crud';
+import { debounce } from '../../utilities';
+import { requestUpdateItem } from './../../crud';
+import { Context } from './../ItemsContext';
 import ItemModal from './../../components/ItemModal/ItemModal';
 import './styles.scss';
 
@@ -28,23 +29,9 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const ItemList = () => {
-    const [items, getItems] = useState([]),
-        [selectedItem, setSelectedItem] = useState(null),
+    const { items, getItems } = useContext(Context);
+    const [selectedItem, setSelectedItem] = useState(null),
         [modal, setModalState] = useState(false);
-    let actionTimer;
-
-    useEffect(() => {
-        fetchItemsList();
-    }, []);
-
-    const fetchItemsList = () => {
-        requestGetItems()
-            .then(response => {
-                getItems(response.data);
-            }, error => {
-                console.log(error);
-            });
-    };
 
     const toggleModal = (item) => {
         if (!item) {
@@ -55,39 +42,34 @@ const ItemList = () => {
         setModalState(!modal);
     };
 
-    const updateItemQuantity = (item, action) => {
-        const currentList = [...items];
-        const newList = currentList.filter(x => x._id !== item._id);
-        const newItem = currentList.find(x => x._id === item._id);
-        const newItemIndex = currentList.findIndex(x => x._id === item._id);
+    const updateItem = (item, action) => {
+        const newList = items.filter(x => x._id !== item._id);
+        const newItem = { ...item };
+        const idx = items.findIndex(x => x._id === item._id);
 
         if (action === 'decr') {
             newItem.quantity--;
         } else if (action === 'incr') {
             newItem.quantity++;
         }
-        newList.splice(newItemIndex, 0, newItem);
-        getItems([
-            ...newList
-        ]);
-
+        newList.splice(idx, 0, newItem);
         // TODO: Use a proper throttling function
-        clearTimeout(actionTimer);
-        actionTimer = setTimeout(() => {
-            const options = {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ quantity: newItem.quantity })
-            };
-            fetch(`${process.env.REACT_APP_SERVER}:${process.env.REACT_APP_SERVER_PORT}/api/item/${item._id}`, options)
-                .then(response => console.log(response.status));
-        }, 2000);
+        getItems(newList);
+        debounce(async () => {
+            try {
+                await requestUpdateItem(item._id, { quantity: newItem.quantity });
+            } catch (e) {
+                console.log(e);
+            }
+        }, 1000, false)();
     };
+
+    
 
     const updateItemNutrition = async (item) => {
         try {
+            updateItem(item);
             await requestUpdateItem(item._id, item);
-            fetchItemsList();
         } catch (e) {
             return new Error(e);
         }
@@ -106,16 +88,16 @@ const ItemList = () => {
                     <ListItemText primary={item.name} onClick={() => toggleModal(item)} />
 
                     <ButtonGroup variant="contained" color="primary" aria-label="contained primary button group">
-                        <Button onClick={() => updateItemQuantity(item, 'incr')}>+</Button>
+                        <Button onClick={() => updateItem(item, 'incr')}>+</Button>
                         <Button>{item.quantity}</Button>
-                        <Button onClick={() => updateItemQuantity(item, 'decr')}>-</Button>
+                        <Button onClick={() => updateItem(item, 'decr')}>-</Button>
                     </ButtonGroup>
                 </ListItem>
                 <Divider className={classes.root} />
             </React.Fragment>
         );
     });
-
+    console.log('renders');
     return (
         <Box>
             <Container maxWidth="md" >

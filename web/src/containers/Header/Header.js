@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useReducer } from 'react';
+import React, { lazy, Suspense, useReducer, useContext } from 'react';
 import {
     Box,
     Container,
@@ -10,6 +10,7 @@ import {
     requestCreateItem,
     requestUpdateItem
 } from './../../crud';
+import { Context } from './../ItemsContext';
 import HeaderControls from './../../components/HeaderControls/HeaderControls';
 import ItemModal from './../../components/ItemModal/ItemModal';
 import ResultModal from './../../components/ResultModal/ResultModal';
@@ -126,6 +127,7 @@ const initialState = {
 
 const Header = () => {
     const [state, dispatch] = useReducer(reducer, initialState);
+    const { items, getItems } = useContext(Context);
 
     const checkForItem = async (scannedItem) => {
         const fetchedItem = await requestSingleItem(+scannedItem);
@@ -139,6 +141,10 @@ const Header = () => {
     const createNewItem = async (newItem) => {
         try {
             await requestCreateItem(newItem);
+            getItems([
+                newItem,
+                ...items
+            ]);
             dispatch({ type: HIDE_NEW_ITEM_MODAL });
         } catch (e) {
             return new Error(e);
@@ -148,6 +154,12 @@ const Header = () => {
     const updateItem = async (newItem) => {
         try {
             await requestUpdateItem(newItem._id, newItem);
+            getItems(items.map(i => {
+                if (i._id === newItem._id) {
+                    return newItem;
+                }
+                return i;
+            }));
             dispatch({ type: HIDE_UPDATE_ITEM_MODAL });
         } catch (e) {
             return new Error(e);

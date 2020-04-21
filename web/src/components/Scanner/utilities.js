@@ -88,7 +88,6 @@ export const inputMapper = {
     },
     decoder: {
         readers: function (value) {
-            debugger
             if (value === 'ean_extended') {
                 return [{
                     format: 'ean_reader',

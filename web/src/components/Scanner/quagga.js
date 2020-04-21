@@ -3825,8 +3825,6 @@ function initWorker(cb) {
         busy: true
     };
 
-    debugger
-
     blobURL = generateWorkerBlob();
     workerThread.worker = new Worker(blobURL);
 
