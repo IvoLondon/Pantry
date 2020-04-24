@@ -1,3 +1,5 @@
+import _ from 'lodash/fp';
+
 export const whatUpdated = (prevProps, prevState, props, state) => {
     Object.entries(props).forEach(([key, val]) =>
         prevProps[key] !== val && console.log(`Prop '${key}' changed`)
@@ -7,6 +9,10 @@ export const whatUpdated = (prevProps, prevState, props, state) => {
             prevState[key] !== val && console.log(`State '${key}' changed`)
         );
     }
+};
+
+export const updateWithoutMutation = (obj, path, val) => {
+    return _.setWith(_.clone(obj), path, val, _.clone);
 };
 
 // https://davidwalsh.name/javascript-debounce-function

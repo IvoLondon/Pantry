@@ -6,7 +6,10 @@ import {
     handleError,
     inputMapper
 } from './utilities';
-import { whatUpdated } from './../../utilities';
+import {
+    whatUpdated,
+    updateWithoutMutation
+} from './../../utilities';
 import {
     Dialog,
     Box,
@@ -192,40 +195,9 @@ class Scanner extends Component {
     };
 
     accessByPath = (obj, path, val) => {
-        const parts = path.split('.'),
-            setter = (typeof val !== 'undefined');
-        // TODO: IMPROVE BIG TIME
-        if (setter) {
-            let newState;
-            if (parts[0] === 'inputStream') {
-                newState = {
-                    ...this.state.cameraState,
-                    inputStream: {
-                        ...this.state.cameraState.inputStream,
-                        constraints: {
-                            ...this.state.cameraState.inputStream.constraints,
-                            facingMode: this.state.activeCamera ? 'environment' : 'user',
-                            devideId: val.deviceId
-                        }
-                    }
-                };
-            } else {
-                if (typeof obj[parts[0]] === 'object' && typeof val === 'object') {
-                    newState = { ...obj };
-                    // TODO : Improve mutation
-                    newState[parts[0]] = { ...obj[parts[0]] };
-                    newState[parts[0]][parts[1]] = [...newState[parts[0]][parts[1]]];
-                    newState[parts[0]][parts[1]][0] = val[0];
-                } else {
-                    throw new Error('Error with new value');
-                }
-            }
-            return newState;
+        if (typeof val !== 'undefined') {
+            return updateWithoutMutation(obj, path, val);
         }
-
-        return parts.reduce(function (o, key, i) {
-            return key in o ? o[key] : {};
-        }, obj);
     };
 
     applySetting = (setting, value) => {

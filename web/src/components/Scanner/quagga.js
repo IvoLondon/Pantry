@@ -7410,7 +7410,6 @@ CodabarReader.prototype._findStart = function () {
     for (i = 1; i < this._counters.length; i++) {
         pattern = self._toPattern(i);
         if (pattern !== -1 && self._isStartEnd(pattern)) {
-            // TODO: Look for whitespace ahead
             start += self._sumCounters(0, i);
             end = start + self._sumCounters(i, i + 8);
             return {
@@ -7829,7 +7828,6 @@ Code39VINReader.prototype._decode = function () {
 };
 
 Code39VINReader.prototype._checkChecksum = function (code) {
-    // TODO
     return !!code;
 };
 

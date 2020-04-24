@@ -53,7 +53,7 @@ const ItemList = () => {
             newItem.quantity++;
         }
         newList.splice(idx, 0, newItem);
-        // TODO: Use a proper throttling function
+        // TODO: fix to use debounce
         getItems(newList);
         debounce(async () => {
             try {
