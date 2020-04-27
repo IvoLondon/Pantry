@@ -1,14 +1,18 @@
 import React from 'react';
 
 import {
-    Input,
     IconButton,
+    Box,
     Grid
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import AddAPhotoIcon from '@material-ui/icons/AddAPhoto';
+import {
+    AddAPhoto,
+    PlaylistAdd
+} from '@material-ui/icons';
 import './style.scss';
 
+{/* TODO: REFACTOR STYLE IF NEEDED */}
 const inputStyles = makeStyles({
     underline: {
         '&::before': {
@@ -23,13 +27,24 @@ const inputStyles = makeStyles({
 const HeaderControls = (props) => {
     const classes = inputStyles();
     return (
-        <Grid container direction="column" alignContent="center">
-            <h5 className="header-controls__title">Scan your goods</h5>
-            <Grid>
-                <Input classes={{ underline: classes.underline }} autoFocus={false} />
-                <IconButton size="medium" color="primary" onClick={props.showScanner}>
-                    <AddAPhotoIcon />
-                </IconButton>
+        <Grid container direction="row" alignContent="flex-end" justify="flex-end">
+            <Grid item container xs={6} alignContent="center" justify="flex-start">
+                <Grid>
+                    <h5 className="header-controls__title">Scan your goods</h5>
+                </Grid>
+            </Grid>
+            <Grid item container xs={6} alignContent="center" justify="flex-end">
+                <Grid item>
+                    <Box>
+                        {/* TODO: CREATE ADD FUNCTIONALITY */}
+                        <IconButton disabled className="header-controls__camera-icon" size="medium">
+                            <PlaylistAdd />
+                        </IconButton>
+                        <IconButton className="header-controls__camera-icon" size="medium" color="inherit" onClick={props.showScanner}>
+                            <AddAPhoto />
+                        </IconButton>
+                    </Box>
+                </Grid>
             </Grid>
         </Grid>
     );

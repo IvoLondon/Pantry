@@ -1,6 +1,9 @@
 .header-controls {
     &__title {
-        margin: 5px 0 10px;
-        text-align: center;
+        display: flex;
     }
-}
+    &__camera-icon {
+        display: flex;
+        align-content: flex-end
+    }
+} 

@@ -1,0 +1,40 @@
+.filter-section {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    // background-color: #050505;
+}
+
+.filter {
+    height: 0;
+    overflow: hidden;
+    transition: all 0.2s ease-in-out;
+    &--open {
+        height: auto;
+        padding: 15px;
+    }
+    /* TODO: Refactor SCSS */
+    &__search-input {
+        .MuiFormLabel-root {
+            &.Mui-focused {
+            }
+        }
+        .MuiInput-root {
+            &::after,
+            &::before {
+            }
+        }
+    }
+    &__sort-select {
+        .MuiFormLabel-root {
+            &.Mui-focused {
+            }
+        }
+        .MuiInputBase-root {
+            &:after,
+            &:before {
+            }
+        }
+    }
+}

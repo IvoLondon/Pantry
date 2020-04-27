@@ -1,4 +1,5 @@
 import _ from 'lodash/fp';
+import React, { useState } from 'react';
 
 export const whatUpdated = (prevProps, prevState, props, state) => {
     Object.entries(props).forEach(([key, val]) =>
@@ -31,3 +32,27 @@ export const debounce = (func, wait, immediate) => {
         if (callNow) func.apply(context, args);
     };
 };
+
+// https://usehooks.com/useLocalStorage/
+export const useLocalStorage = (key, initialValue) => {
+    const [storedValue, setStoredValue] = useState(() => {
+        try {
+            const item = window.localStorage.getItem(key);
+            return item ? JSON.parse(item) : initialValue;
+        } catch (e) {
+            console.log(e);
+            return initialValue;
+        }
+    });
+
+    const setValue = value => {
+        try {
+            const valueToStore = value instanceof Function ? value(storedValue) : value;
+            setStoredValue(valueToStore);
+            window.localStorage.setItem(key, JSON.stringify(valueToStore));
+        } catch (e) {
+            console.log(e);
+        }
+    }
+    return [storedValue, setValue];
+}

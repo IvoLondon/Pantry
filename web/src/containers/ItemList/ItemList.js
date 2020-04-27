@@ -18,6 +18,8 @@ import { debounce } from '../../utilities';
 import { requestUpdateItem } from './../../crud';
 import { Context } from './../ItemsContext';
 import ItemModal from './../../components/ItemModal/ItemModal';
+import Filter from './../Filter/Filter';
+
 import './styles.scss';
 
 
@@ -31,6 +33,7 @@ const useStyles = makeStyles((theme) => ({
 const ItemList = () => {
     const { items, getItems } = useContext(Context);
     const [selectedItem, setSelectedItem] = useState(null),
+        [filterMode, setFilter] = useState({}),
         [modal, setModalState] = useState(false);
 
     const toggleModal = (item) => {
@@ -74,40 +77,67 @@ const ItemList = () => {
     };
 
     const classes = useStyles();
-    const itemsList = items.map(item => {
-        return (
-            <React.Fragment key={item.barcode}>
-                <ListItem button>
-                    <ListItemIcon>
-                        <Badge badgeContent={item.quantity} showZero color="secondary">
-                            <StoreIcon style={{ color: 'white' }} />
-                        </Badge>
-                    </ListItemIcon>
-                    <ListItemText primary={item.name} onClick={() => toggleModal(item)} />
+    const itemsRender = () => {
+        let itemsList = [...items];
+        if (Object.keys(filterMode).length) {
+            if (filterMode.hasOwnProperty('name') && filterMode.name.length > 2) {
+                const val = filterMode.name;
+                itemsList = itemsList.filter(el => {
+                    return el.name.toLowerCase().includes(val.toLowerCase());
+                });
+            }
 
-                    <ButtonGroup variant="contained" color="primary" aria-label="contained primary button group">
-                        <Button onClick={() => updateItem(item, 'incr')}>+</Button>
-                        <Button>{item.quantity}</Button>
-                        <Button onClick={() => updateItem(item, 'decr')}>-</Button>
-                    </ButtonGroup>
-                </ListItem>
-                <Divider className={classes.root} />
-            </React.Fragment>
-        );
-    });
-    console.log('renders');
+            if (filterMode.hasOwnProperty('macros')) {
+                const val = filterMode.macros;
+                itemsList.sort((elOne, elTwo) => {
+                    if (val === 'protein') {
+                        return elTwo.macros[val] - elOne.macros[val];
+                    } else {
+                        return elTwo.macros[val]?.total - elOne.macros[val]?.total;
+                    }
+                });
+            }
+        }
+        return itemsList.map(item => {
+            return (
+                <React.Fragment key={item.barcode}>
+                    <ListItem button>
+                        <ListItemIcon>
+                            <Badge badgeContent={item.quantity} showZero color="secondary">
+                                {/* TODO: UPDATE ICONS COLOUR */}
+                                <StoreIcon color="primary" />
+                            </Badge>
+                        </ListItemIcon>
+                        <ListItemText primary={item.name} onClick={() => toggleModal(item)} />
+                        <ListItemText primary={item.macros.carb.total} />
+                        <ListItemText primary={item.macros.fat.total} />
+                        <ListItemText primary={item.macros.protein} />
+
+                        <ButtonGroup variant="contained" color="default">
+                            <Button onClick={() => updateItem(item, 'incr')}>+</Button>
+                            <Button>{item.quantity}</Button>
+                            <Button onClick={() => updateItem(item, 'decr')}>-</Button>
+                        </ButtonGroup>
+                    </ListItem>
+                    <Divider className={classes.root} />
+                </React.Fragment>
+            );
+        });
+    };
+
     return (
         <Box>
-            <Container maxWidth="md" >
+            <Container maxWidth="md">
                 <Grid container direction="row" justify="center" alignItems="center">
                     <List component="nav" className="ItemList" aria-label="main mailbox folders">
-                        {itemsList}
+                        {itemsRender()}
                     </List>
                     <ItemModal
                         open={modal}
                         selectedItem={selectedItem}
                         onClose={toggleModal}
                         onSaveChanges={updateItemNutrition} />
+                        <Filter filterMode={filterMode} setFilter={setFilter} />
                 </Grid>
             </Container>
         </Box>
