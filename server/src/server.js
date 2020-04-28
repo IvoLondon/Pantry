@@ -6,7 +6,8 @@ import cors from 'cors';
 import configs from './config/index';
 import { connect } from './utils/db';
 
-import itemRouter from './resources/item/item.router'
+import itemRouter from './resources/item/item.router';
+import userRouter from './resources/user/user.router';
 
 export const app = express();
 
@@ -17,8 +18,11 @@ app.use(json());
 app.use(urlencoded({ extended: true }));
 app.use(morgan('dev'));
 
+app.use('/auth', userRouter);
 app.use('/api', itemRouter);
+
 app.get('/', (req, res) => res.status(200).send('Works'));
+
 export const start = async () => {
     try {
         await connect();
