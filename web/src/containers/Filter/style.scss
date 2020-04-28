@@ -3,6 +3,7 @@
     bottom: 0;
     left: 0;
     width: 100%;
+    box-shadow: 0px -2px 2px rgb(219, 219, 219);
     // background-color: #050505;
 }
 
@@ -10,6 +11,7 @@
     height: 0;
     overflow: hidden;
     transition: all 0.2s ease-in-out;
+    
     &--open {
         height: auto;
         padding: 15px;
@@ -26,7 +28,8 @@
             }
         }
     }
-    &__sort-select {
+    &__sort-select.MuiFormControl-root {
+        min-width: 200px;
         .MuiFormLabel-root {
             &.Mui-focused {
             }

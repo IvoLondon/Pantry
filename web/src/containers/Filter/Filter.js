@@ -12,7 +12,7 @@ import {
 import {
     Close,
     Autorenew,
-    KeyboardArrowDown
+    KeyboardArrowUp
 } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/core/styles';
 import { useLocalStorage } from './../../utilities';
@@ -21,12 +21,12 @@ import './style.scss';
 const useStyles = makeStyles((theme) => ({
     form: {
         root: {
-            minWidth: '60%'
+            minWidth: '200px'
         }
     },
     textField: {
         root: {
-            minWidth: '60%'
+            minWidth: '200px'
         }
     }
 }));
@@ -168,7 +168,7 @@ const Filter = (props) => {
                                 label="Search by name" />
                         </Grid>
                         <Grid item xs={4}>
-                            <FormControl fullWidth className="filter__sort-select" classes={{ root: css.form.root }}>
+                            <FormControl className="filter__sort-select" classes={{ root: css.form.root }}>
                                 <InputLabel id="sort-label">Sort</InputLabel>
                                 <Select
                                     labelId="sort-label"
@@ -197,9 +197,9 @@ const Filter = (props) => {
                         </Grid>
                     </Grid>
                     { !state.isVisible
-                        ? (<IconButton onClick={openFilter}>
-                            <KeyboardArrowDown color="primary" />
-                        </IconButton>)
+                        ? (<Grid justify="center" container item><IconButton onClick={openFilter}>
+                            <KeyboardArrowUp color="primary" />
+                        </IconButton></Grid>)
                         : null
                     }
                 </Grid>
