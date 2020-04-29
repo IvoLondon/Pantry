@@ -8,6 +8,7 @@ const baseConfig = {
     env,
     isLocal: env === 'development',
     port: 9002,
+    authSecret: process.env.AUTH_SECRET,
 }
 
 let envConfig = {}

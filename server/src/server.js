@@ -1,5 +1,6 @@
 import express from 'express';
 import { json, urlencoded } from 'body-parser'; //TODO: CHECK
+import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import cors from 'cors';
 
@@ -15,6 +16,7 @@ app.disable('x-powered-by');
 
 app.use(cors());
 app.use(json());
+app.use(cookieParser());
 app.use(urlencoded({ extended: true }));
 app.use(morgan('dev'));
 
@@ -22,6 +24,7 @@ app.use('/auth', userRouter);
 app.use('/api', itemRouter);
 
 app.get('/', (req, res) => res.status(200).send('Works'));
+
 
 export const start = async () => {
     try {

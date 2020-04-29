@@ -13,6 +13,16 @@ const userSchema = new mongoose.Schema({
     }
 });
 
+userSchema.methods.isCorrectPassword = function(password, callback) {
+    bcrypt.compare(password, this.password, function(err, same) {
+        if (err) {
+            callback(err);
+        } else {
+            callback(err, same);
+        }
+    });
+}
+
 const saltRounds = 10;
 
 userSchema.pre('save', function(next) {

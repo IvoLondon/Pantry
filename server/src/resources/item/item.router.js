@@ -1,8 +1,9 @@
 import { Router } from 'express';
 import controllers from './item.controllers';
+import withAuth from './../../middlewares/auth';
 
 const router = Router();
-
+router.use(withAuth);
 router.route('/item')
     .get(controllers.getMany)
     .post(controllers.createOne);
