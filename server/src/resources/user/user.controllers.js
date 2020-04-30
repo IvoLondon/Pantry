@@ -1,5 +1,6 @@
 import { User } from './user.model';
-import config from './../../config'
+import config from './../../config';
+import jwt from 'jsonwebtoken';
 
 const createUser = async (req, res) => {
     const { email, password } = req.body;
@@ -31,7 +32,8 @@ const signInUser = async (req, res) => {
                     const token = jwt.sign(payload, config.authSecret, {
                         expiresIn: '24h'
                     });
-                    res.cookie('token', token, { httpOnly: true }).sendStatus(200);
+                    console.log(token);
+                    res.cookie('token', token, { maxAge: 900000, httpOnly: true, }).sendStatus(200);
                 }
             });
         };

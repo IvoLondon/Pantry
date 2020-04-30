@@ -1,5 +1,8 @@
 export const requestGetItems = () => {
-    return fetch(`${process.env.REACT_APP_SERVER}:${process.env.REACT_APP_SERVER_PORT}/api/item`)
+    const options = {
+        credentials: 'include'
+    }
+    return fetch(`${process.env.REACT_APP_SERVER}:${process.env.REACT_APP_SERVER_PORT}/api/item`, options)
         .then(response => response.json());
 };
 
@@ -8,13 +11,18 @@ export const requestUpdateItem = (id, item) => {
     const options = {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(item)
     };
     return fetch(`${process.env.REACT_APP_SERVER}:${process.env.REACT_APP_SERVER_PORT}/api/item/${id}`, options);
 };
 
 export const requestSingleItem = (id) => {
-    return fetch(`${process.env.REACT_APP_SERVER}:${process.env.REACT_APP_SERVER_PORT}/api/item/${id}`, { method: 'GET' })
+    const options = {
+        method: 'GET',
+        credentials: 'include',
+    }
+    return fetch(`${process.env.REACT_APP_SERVER}:${process.env.REACT_APP_SERVER_PORT}/api/item/${id}`, options)
         .then(response => response.json());
 };
 
@@ -22,8 +30,22 @@ export const requestCreateItem = (item) => {
     const options = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(item)
+        body: JSON.stringify(item),
+        credentials: 'include',
     };
     return fetch(`${process.env.REACT_APP_SERVER}:${process.env.REACT_APP_SERVER_PORT}/api/item`, options)
         .then(response => response.json());
 };
+
+export const requestAuth = (user) => {
+    const options = {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify(user)
+    };
+    return fetch(`${process.env.REACT_APP_SERVER}:${process.env.REACT_APP_SERVER_PORT}/auth/signin`, options);
+}

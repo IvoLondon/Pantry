@@ -14,9 +14,9 @@ export const app = express();
 
 app.disable('x-powered-by');
 
-app.use(cors());
-app.use(json());
 app.use(cookieParser());
+app.use(cors({ credentials: true, origin: `${configs.clientHostUrl}:${configs.clientHostPort}` }));
+app.use(json());
 app.use(urlencoded({ extended: true }));
 app.use(morgan('dev'));
 
