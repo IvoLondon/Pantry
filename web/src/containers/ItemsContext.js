@@ -1,12 +1,26 @@
 import React, { createContext, useEffect, useState } from 'react';
 import { requestGetItems } from './../crud';
+import Login from './Login/Login';
+import { requestCheckAuth } from './../crud';
 
 export const Context = createContext();
 
 const ItemsContext = (props) => {
     const [items, getItems] = useState([]);
+    const [login, setLogin] = useState(true);
+
+    const authenticate = () => {
+        setLogin(true);
+    }
+
     useEffect(() => {
-        fetchData();
+        requestCheckAuth().then(data => {
+            if (data?.status !== 200) {
+                setLogin(false);
+            } else {
+                fetchData();
+            }
+        });
     }, []);
 
     const fetchData = async () => {
@@ -17,10 +31,16 @@ const ItemsContext = (props) => {
             console.log(e);
         };
     };
+    let contextChildren;
+    if (login) {
+        contextChildren = props.children
+    } else {
+        contextChildren = <Login authenticate={authenticate} />
+    }
 
     return (
         <Context.Provider value={{ items, getItems }}>
-            { props.children }
+            { contextChildren }
         </Context.Provider>
     );
 };

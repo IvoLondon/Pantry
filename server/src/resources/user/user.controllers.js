@@ -28,12 +28,8 @@ const signInUser = async (req, res) => {
                 } else if (!same) {
                     res.status(401).send({ error: 'Incorrect email or password' });
                 } else {
-                    const payload = { email };
-                    const token = jwt.sign(payload, config.authSecret, {
-                        expiresIn: '24h'
-                    });
-                    console.log(token);
-                    res.cookie('token', token, { maxAge: 900000, httpOnly: true, }).sendStatus(200);
+                    res = setCookie(res, { email })
+                    res.sendStatus(200);
                 }
             });
         };
@@ -41,7 +37,34 @@ const signInUser = async (req, res) => {
 }
 
 const checkAuth = async (req, res) => {
+    const token = 
+      req.body.token ||
+      req.query.token ||
+      req.headers['x-access-token'] ||
+      req.cookies.token;
+      
+    if (!token) {
+        res.status(401).send('Unauthorized: No token provided');
+    } else {
+        jwt.verify(token, config.authSecret, function(err, decoded) {
+            if (err) {
+                res.status(401).send('Unauthorized: Invalid token');
+            } else {
+                res = setCookie(res, { email: decoded.email })
+                res.status(200).send({ message: 'User token is valid' });
+            }
+        });
+    }
+}
 
+const setCookie = (res, email) => {
+    const payload = { email };
+    const token = jwt.sign(payload, config.authSecret, {
+        expiresIn: '7d'
+    });
+    res.cookie('token', token, { maxAge: 48 * 60 * 60 * 1000, httpOnly: true, });
+
+    return res;
 }
 
 export const controllers = {
