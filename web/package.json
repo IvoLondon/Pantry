@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "parcel index.html -p 3002",
+    "develop": "parcel index.html -p 3002 --no-hmr",
     "build": "parcel build index.html --out-dir build",
     "lint": "eslint --ext=js --ext=jsx ./src",
     "lint-fix": "eslint --ext=js --ext=jsx ./src --fix"

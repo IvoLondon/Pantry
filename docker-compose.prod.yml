@@ -1,31 +1,31 @@
 version: "3.7"
 services: 
-    web:
-        container_name: web_dev
+    web_prod:
+        container_name: web_prod
         build:
             context: .
-            dockerfile: './docker/web.Dockerfile'
+            dockerfile: './docker/web_prod.Dockerfile'
         depends_on:
             - server
         ports: 
-            - "3002:3002"
+            - "3003:80"
         environment:
-            - REACT_APP_SERVER
+            - REACT_APP_SERVER="http://server"
             - REACT_APP_SERVER_PORT
-        volumes:
-            - webdata:/web
     server:
         build:
             context: .
             dockerfile: './docker/server.Dockerfile'
         depends_on:
             - mongodatabase
+        expose: 
+            - "9002"
         ports: 
             - "9002:9002"
         restart: on-failure
         environment:
             - DB_URL=mongodb://mongodatabase:27017/pantry
-            - CLIENT_HOST_URL
+            - CLIENT_HOST_URL="http://web"
             - CLIENT_HOST_PORT
             - AUTH_SECRET
     mongodatabase: 
@@ -35,6 +35,4 @@ services:
         volumes: 
             - mongodb_data_container:/data/db
 volumes:
-    webdata:
     mongodb_data_container:
-    
