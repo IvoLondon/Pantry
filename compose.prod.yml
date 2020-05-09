@@ -10,22 +10,22 @@ services:
         ports: 
             - "3003:80"
         environment:
-            - REACT_APP_SERVER="http://server"
+            - REACT_APP_SERVER
             - REACT_APP_SERVER_PORT
+        volumes:
+            - webdata:/web
     server:
         build:
             context: .
             dockerfile: './docker/server.Dockerfile'
         depends_on:
             - mongodatabase
-        expose: 
-            - "9002"
         ports: 
             - "9002:9002"
         restart: on-failure
         environment:
             - DB_URL=mongodb://mongodatabase:27017/pantry
-            - CLIENT_HOST_URL="http://web"
+            - CLIENT_HOST_URL
             - CLIENT_HOST_PORT
             - AUTH_SECRET
     mongodatabase: 
@@ -35,4 +35,5 @@ services:
         volumes: 
             - mongodb_data_container:/data/db
 volumes:
+    webdata:
     mongodb_data_container:

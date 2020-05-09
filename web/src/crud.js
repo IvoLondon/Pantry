@@ -1,5 +1,6 @@
 export const requestGetItems = () => {
     const options = {
+        method: 'GET',
         credentials: 'include'
     }
     return fetch(`${process.env.REACT_APP_SERVER}:${process.env.REACT_APP_SERVER_PORT}/api/item`, options)
