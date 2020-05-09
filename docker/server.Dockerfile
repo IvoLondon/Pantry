@@ -4,4 +4,4 @@ WORKDIR /srv
 COPY /server .
 RUN npm install --silent
 EXPOSE 9002
-CMD ["npm", "start"]
+CMD ["npm", "run", "prod"]

@@ -8,7 +8,7 @@
         "dev": "nodemon --exec npm run restart",
         "build": "babel src --out-dir dist",
         "restart": "rimraf dist && npm run build && npm start",
-        "test": "echo \"DO THE TESTSS\" && exit 1"
+        "prod": "rimraf dist && npm run build && npm start"
     },
     "author": "",
     "license": "ISC",

@@ -6,7 +6,8 @@ export const connect = (url = options.dbUrl, opts = {}) => {
         url,
         {
             ...opts,
-            useNewUrlParser: true
+            useNewUrlParser: true,
+            useUnifiedTopology: true
         }
     )
 }
