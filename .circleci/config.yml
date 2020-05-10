@@ -16,8 +16,7 @@ jobs:
             command: |
               ssh pantry@51.75.171.192 "cd app \
               && git reset --hard && git pull origin master -f \
-              && docker-compose -f compose.prod.yml build \
-              && docker-compose -f compose.prod.yml up -d"
+              && docker-compose -f compose.prod.yml up -d --build --remove-orphans"
               
 workflows:
   version: 2
