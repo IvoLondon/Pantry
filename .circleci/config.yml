@@ -1,0 +1,29 @@
+# Javascript Node CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-javascript/ for more details
+#
+version: 2
+jobs:
+  deploy_and_run:
+    machine:
+        enabled: true
+    steps:
+        - add_ssh_keys:
+            fingerprints:
+              -"32:02:36:de:a8:d8:1a:1e:95:78:9e:cd:7a:c1:5b:48"
+        - run:
+            name: Deploy To Server Over SSH
+            command: |
+              ssh pantry@51.75.171.192 "cd app \
+              && git reset --hard && git pull origin master -f \
+              && docker-compose -f compose.prod.yml build \
+              && docker-compose -f compose.prod.yml up -d"
+              
+workflows:
+  version: 2
+  pantry_workflow:
+    jobs:
+      - deploy_and_run:
+          filters:
+            branches:
+              only: master
