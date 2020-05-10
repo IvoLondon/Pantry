@@ -3,7 +3,7 @@ export const requestGetItems = () => {
         method: 'GET',
         credentials: 'include'
     }
-    return fetch(`${process.env.REACT_APP_SERVER}:${process.env.REACT_APP_SERVER_PORT}/api/item`, options)
+    return fetch(`${process.env.REACT_APP_SERVER}/api/item`, options)
         .then(response => response.json());
 };
 
@@ -15,7 +15,7 @@ export const requestUpdateItem = (id, item) => {
         credentials: 'include',
         body: JSON.stringify(item)
     };
-    return fetch(`${process.env.REACT_APP_SERVER}:${process.env.REACT_APP_SERVER_PORT}/api/item/${id}`, options);
+    return fetch(`${process.env.REACT_APP_SERVER}/api/item/${id}`, options);
 };
 
 export const requestSingleItem = (id) => {
@@ -23,7 +23,7 @@ export const requestSingleItem = (id) => {
         method: 'GET',
         credentials: 'include',
     }
-    return fetch(`${process.env.REACT_APP_SERVER}:${process.env.REACT_APP_SERVER_PORT}/api/item/${id}`, options)
+    return fetch(`${process.env.REACT_APP_SERVER}/api/item/${id}`, options)
         .then(response => response.json());
 };
 
@@ -34,7 +34,7 @@ export const requestCreateItem = (item) => {
         body: JSON.stringify(item),
         credentials: 'include',
     };
-    return fetch(`${process.env.REACT_APP_SERVER}:${process.env.REACT_APP_SERVER_PORT}/api/item`, options)
+    return fetch(`${process.env.REACT_APP_SERVER}/api/item`, options)
         .then(response => response.json());
 };
 
@@ -48,7 +48,7 @@ export const requestAuth = (user) => {
         credentials: 'include',
         body: JSON.stringify(user)
     };
-    return fetch(`${process.env.REACT_APP_SERVER}:${process.env.REACT_APP_SERVER_PORT}/auth/signin`, options);
+    return fetch(`${process.env.REACT_APP_SERVER}/auth/signin`, options);
 }
 
 export const requestCheckAuth = (user) => {
@@ -60,5 +60,5 @@ export const requestCheckAuth = (user) => {
         },
         credentials: 'include',
     };
-    return fetch(`${process.env.REACT_APP_SERVER}:${process.env.REACT_APP_SERVER_PORT}/auth/checkAuth`, options);
+    return fetch(`${process.env.REACT_APP_SERVER}/auth/checkAuth`, options);
 }

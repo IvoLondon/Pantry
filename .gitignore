@@ -7,3 +7,5 @@ node_modules
 web/.env
 server/.env
 web/build
+web/.env-prod
+server/.env-prod
