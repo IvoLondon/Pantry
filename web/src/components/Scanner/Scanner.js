@@ -138,7 +138,7 @@ class Scanner extends Component {
         this.setState({
             selectedStore: e.target.value
         }, () => {
-            this.setCameraState(state, value);
+            this.setCameraState(state, [{format: value, config: {}}]);
         });
     }
 
@@ -194,12 +194,48 @@ class Scanner extends Component {
         });
     };
 
+    // accessByPath = (obj, path, val) => {
+    //     if (typeof val !== 'undefined') {
+    //         return updateWithoutMutation(obj, path, val);
+    //     }
+    // };
     accessByPath = (obj, path, val) => {
-        if (typeof val !== 'undefined') {
-            return updateWithoutMutation(obj, path, val);
+        const parts = path.split('.'),
+            setter = (typeof val !== 'undefined');
+        // TODO: IMPROVE BIG TIME
+        if (setter) {
+            let newState;
+            if (parts[0] === 'inputStream') {
+                newState = {
+                    ...this.state.cameraState,
+                    inputStream: {
+                        ...this.state.cameraState.inputStream,
+                        constraints: {
+                            ...this.state.cameraState.inputStream.constraints,
+                            facingMode: this.state.activeCamera ? 'environment' : 'user',
+                            devideId: val.deviceId
+                        }
+                    }
+                };
+            } else {
+                if (typeof obj[parts[0]] === 'object' && typeof val === 'object') {
+                    newState = { ...obj };
+                    // TODO : Improve mutation
+                    newState[parts[0]] = { ...obj[parts[0]] };
+                    newState[parts[0]][parts[1]] = [...newState[parts[0]][parts[1]]];
+                    newState[parts[0]][parts[1]][0] = val[0];
+                } else {
+                    throw new Error('Error with new value');
+                }
+            }
+            return newState;
         }
-    };
 
+        return parts.reduce(function (o, key, i) {
+            return key in o ? o[key] : {};
+        }, obj);
+    };
+    
     applySetting = (setting, value) => {
         const track = Quagga.CameraAccess.getActiveTrack();
         if (typeof track?.getCapabilities === 'function') {
