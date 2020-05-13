@@ -30,7 +30,7 @@ const HeaderControls = (props) => {
         <Grid container direction="row" alignContent="flex-end" justify="flex-end">
             <Grid item container xs={6} alignContent="center" justify="flex-start">
                 <Grid>
-                    <h5 className="header-controls__title">Scan your goods</h5>
+                    <h5 className="header-controls__title">Scan your can</h5>
                 </Grid>
             </Grid>
             <Grid item container xs={6} alignContent="center" justify="flex-end">
