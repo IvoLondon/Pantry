@@ -2,10 +2,19 @@ import mongoose from 'mongoose';
 
 const itemSchema = new mongoose.Schema(
     {
-        barcode: {
-            type: Number,
+        barcodeId: {
+            type: String,
             required: true,
             unique: true
+        },
+        barcodeType: {
+            type: String,
+            required: true,
+            lowercse: true,
+            enum: ['ean_8', 'ean']
+        },
+        continuous: {
+            type: Boolean
         },
         name: {
             type: String,

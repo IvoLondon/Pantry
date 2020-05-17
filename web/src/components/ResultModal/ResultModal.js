@@ -27,10 +27,10 @@ const ResultModal = (props) => {
     const dialogClasses = contentStyle();
 
     return (
-        <Dialog open={props.open} onClose={props.toggleResultModal}>
+        <Dialog open={props.open} onClose={props.onClose}>
             <DialogContent classes={{ root: dialogClasses.root }}>
                 <h5 className="result-modal__subtitle">Is the barcode correct?</h5>
-                <h3 className="result-modal__title">{props.itemId}</h3>
+                <h3 className="result-modal__title">{props.barcodeId}</h3>
                 <Grid container direction="column" justify="center" alignItems="center">
                     <Button variant="contained" color="primary" onClick={props.onScanAgain}>Scan Again</Button>
                     <Divider classes={{ root: dividerClasses.root }} />

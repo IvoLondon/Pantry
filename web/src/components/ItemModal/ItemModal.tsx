@@ -11,26 +11,40 @@ import {
     TableBody,
     TableCell,
     TableRow,
-    Divider
+    Divider,
+    FormControl,
+    Select,
+    InputLabel,
+    MenuItem
 } from '@material-ui/core';
-
+import { 
+    storeCodes,
+} from './../../utilities';
 import './style.scss';
+import {
+    ItemInterface
+} from './interfaces';
+
 
 
 const ItemModal = (props) => {
     const [item, getItem] = useState({});
     const [editMode, setEditMode] = useState(false);
     const [createMode, setCreateMode] = useState(false);
-    const INITIAL_ITEM = {
+
+    const INITIAL_ITEM: ItemInterface = {
+        name: '',
+        quantity: 0,
         calories: 0,
-        barcode: props.itemId ?? 0,
+        barcodeId: props.barcodeId ?? '',
+        barcodeType: '',
+        continuous: false,
         macros: {
             carb: { total: 0, sugar: 0 },
             fat: { total: 0, saturated: 0, unsaturated: 0, trans: 0 },
             protein: 0
         },
-        name: '',
-        quantity: 0
+        
     };
 
     useEffect(() => {
@@ -61,6 +75,7 @@ const ItemModal = (props) => {
     };
 
     const updateState = (updatedItem, field = [], value) => {
+        // TODO: USE LODASH CLONE AND SETWITH
         if (updatedItem.hasOwnProperty(field[0]) && typeof updatedItem[field[0]] !== 'object') {
             updatedItem[field[0]] = isNaN(Number(value)) ? value : Number(value);
         } else {
@@ -77,6 +92,12 @@ const ItemModal = (props) => {
     const createData = (name, calories, ref) => {
         return { name, calories, ref };
     };
+
+    const getStoreCodes = (storecodes) => {
+        return storecodes.map(({code, label}) => {
+            return <MenuItem key={code} value={code}>{label}</MenuItem>
+        })
+    }
 
     // TODO: render the data auto
     const rows = [
@@ -95,26 +116,36 @@ const ItemModal = (props) => {
             <Dialog open={props.open} onClose={() => props.onClose(false)}>
                 <form>
                     <DialogTitle disableTypography={true} id="dialog-title">
-                        <Box display="flex" width="100%">
+                        { createMode ?
                             <Box width="100%">
-                                { createMode ? <TextField
-                                    className="ItemModal__text-field"
-                                    id="item-barcode"
-                                    disabled
+                                <TextField
+                                    name="barcode"
                                     label="Barcode*"
                                     disabled={!editMode}
-                                    name="barcode"
                                     onChange={updateField}
-                                    defaultValue={props.itemId} />
-                                    : null }
-
-                                <TextField
                                     className="ItemModal__text-field"
-                                    id="item-title"
-                                    disabled
+                                    defaultValue={props.barcodeId} />
+                                <FormControl>
+                                    <InputLabel className="store-dropdown-label" id="store-dropdown-label">Select your store:</InputLabel>
+                                    <Select
+                                        name="barcodeType"
+                                        labelId="barcode-type-label"
+                                        value={storeCodes[0].code}
+                                        onChange={updateField}
+                                        className="barcode-type-dropdown"
+                                    >
+                                        {getStoreCodes(storeCodes)}
+                                    </Select>
+                                </FormControl>
+                            </Box>
+                        : null }
+                        <Box display="flex" width="100%">
+                            <Box width="100%">
+                                <TextField
+                                    name="name"
+                                    className="ItemModal__text-field"
                                     label={createMode ? 'Product name*' : item?.barcode}
                                     disabled={!editMode}
-                                    name="name"
                                     onChange={updateField}
                                     defaultValue={item?.name} />
                             </Box>

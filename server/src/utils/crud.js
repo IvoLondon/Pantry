@@ -1,7 +1,7 @@
 export const getOne = model => async (req, res) => {
     try {
         const doc = await model
-            .findOne({ barcode: req.params.id })
+            .findOne({ barcodeId: req.params.id })
             .lean()
             .exec()
         if (!doc) {
@@ -88,7 +88,7 @@ export const updateOne = model => async (req, res) => {
 export const removeOne = model => async (req, res) => {
     try {
         const removed = await model.findOneAndRemove({
-            barcode: req.params.id
+            barcodeId: req.params.id
         })
     
         if (!removed) {

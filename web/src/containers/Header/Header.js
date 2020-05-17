@@ -15,110 +15,23 @@ import HeaderControls from './../../components/HeaderControls/HeaderControls';
 import ItemModal from './../../components/ItemModal/ItemModal';
 import ResultModal from './../../components/ResultModal/ResultModal';
 
+import {
+    reducer,
+    ITEM_FOUND,
+    CREATE_NEW,
+    SCAN_AGAIN,
+    SHOW_SCANNER,
+    SHOW_RESULT_MODAL,
+    SHOW_NEW_ITEM_MODAL,
+    SHOW_UPDATE_ITEM_MODAL,
+} from './reducer';
+
 const Scanner = lazy(() => import('../../components/Scanner/Scanner'));
-
-const SHOW_SCANNER = 'SHOW_SCANNER',
-    HIDE_SCANNER = 'HIDE_SCANNER',
-    ITEM_FOUND = 'ITEM_FOUND',
-    SCAN_AGAIN = 'SCAN_AGAIN',
-    CREATE_NEW = 'CREATE_NEW',
-    SHOW_NEW_ITEM_MODAL = 'SHOW_NEW_ITEM_MODAL',
-    HIDE_NEW_ITEM_MODAL = 'HIDE_NEW_ITEM_MODAL',
-    SHOW_RESULT_MODAL = 'SHOW_RESULT_MODAL',
-    HIDE_RESULT_MODAL = 'HIDE_RESULT_MODAL',
-    SHOW_UPDATE_ITEM_MODAL = 'SHOW_UPDATE_ITEM_MODAL',
-    HIDE_UPDATE_ITEM_MODAL = 'HIDE_UPDATE_ITEM_MODAL';
-
-const reducer = (state, action) => {
-    if (action.type === SHOW_SCANNER) {
-        return {
-            ...state,
-            showScanner: true
-        };
-    };
-
-    if (action.type === HIDE_SCANNER) {
-        return {
-            ...state,
-            showScanner: false
-        };
-    };
-
-    if (action.type === SHOW_RESULT_MODAL) {
-        return {
-            ...state,
-            showScanner: false,
-            showResultModal: true,
-            itemId: action.payload.itemId
-        };
-    };
-
-    if (action.type === HIDE_RESULT_MODAL) {
-        return {
-            ...state,
-            showResultModal: false
-        };
-    };
-
-    if (action.type === SHOW_UPDATE_ITEM_MODAL) {
-        return {
-            ...state,
-            showUpdateItemModal: true
-        };
-    };
-
-    if (action.type === HIDE_UPDATE_ITEM_MODAL) {
-        return {
-            ...state,
-            showUpdateItemModal: false
-        };
-    };
-
-    if (action.type === SHOW_NEW_ITEM_MODAL) {
-        return {
-            ...state,
-            showNewItemModal: true
-        };
-    };
-
-    if (action.type === HIDE_NEW_ITEM_MODAL) {
-        return {
-            ...state,
-            showNewItemModal: false
-        };
-    };
-
-    if (action.type === ITEM_FOUND) {
-        return {
-            ...state,
-            item: action.payload.data,
-            showUpdateItemModal: true,
-            showScanner: false
-        };
-    };
-
-    if (action.type === SCAN_AGAIN) {
-        return {
-            ...state,
-            showScanner: true,
-            showResultModal: false
-        };
-    };
-
-    if (action.type === CREATE_NEW) {
-        return {
-            ...state,
-            showNewItemModal: true,
-            showResultModal: false
-        };
-    };
-
-    return state;
-};
 
 const initialState = {
     item: {},
-    itemId: 0,
+    barcodeId: '',
+    barcodeType: '',
     showScanner: false,
     showNewItemModal: false,
     showResultModal: false,
@@ -129,23 +42,25 @@ const Header = () => {
     const [state, dispatch] = useReducer(reducer, initialState);
     const { items, getItems } = useContext(Context);
 
-    const checkForItem = async (scannedItem) => {
-        const fetchedItem = await requestSingleItem(+scannedItem);
+    const onDetect = async ({ barcodeId, barcodeType }) => {
+        const fetchedItem = await requestSingleItem(barcodeId);
+        //TODO: ADD THIRD PARTY SCRIPTS
         if (fetchedItem.data) {
             dispatch({ type: ITEM_FOUND, payload: { data: fetchedItem.data } });
         } else {
-            dispatch({ type: SHOW_RESULT_MODAL, payload: { itemId: +scannedItem } });
+            dispatch({ type: SHOW_RESULT_MODAL, payload: { show: true, barcodeId, barcodeType } });
         }
     };
 
-    const createNewItem = async (newItem) => {
+    const createNewItem = async (item) => {
+        debugger
         try {
-            await requestCreateItem(newItem);
+            await requestCreateItem(item);
             getItems([
-                newItem,
+                item,
                 ...items
             ]);
-            dispatch({ type: HIDE_NEW_ITEM_MODAL });
+            dispatch({ type: SHOW_NEW_ITEM_MODAL, payload: { show: false } });
         } catch (e) {
             return new Error(e);
         }
@@ -160,7 +75,7 @@ const Header = () => {
                 }
                 return i;
             }));
-            dispatch({ type: HIDE_UPDATE_ITEM_MODAL });
+            dispatch({ type: SHOW_UPDATE_ITEM_MODAL, payload: { show: false }});
         } catch (e) {
             return new Error(e);
         }
@@ -171,35 +86,35 @@ const Header = () => {
             <Box className="Header">
                 <Container maxWidth="md" >
                     <Grid container direction="row" justify="center" alignItems="center">
-                        <HeaderControls showScanner={() => dispatch({ type: SHOW_SCANNER })} />
+                        <HeaderControls showScanner={() => dispatch({ type: SHOW_SCANNER, payload: { show: true }})} />
                         <Suspense fallback={<h6>Loading...</h6>}>
                             {state.showScanner
                                 ? <Scanner
                                     showScanner={state.showScanner}
-                                    hideScanner={() => dispatch({ type: HIDE_SCANNER })}
-                                    onDetect={checkForItem} />
+                                    hideScanner={() => dispatch({ type: SHOW_SCANNER, payload: { show: false }})}
+                                    onDetect={onDetect} />
                                 : null }
                         </Suspense>
                         { state.showNewItemModal
                             ? <ItemModal
                                 open={state.showNewItemModal}
-                                itemId={state.itemId}
-                                onClose={() => dispatch({ type: HIDE_NEW_ITEM_MODAL })}
+                                barcodeId={state.barcodeId}
+                                onClose={() => dispatch({ type: SHOW_NEW_ITEM_MODAL, payload: { show: false }})}
                                 onSaveChanges={createNewItem} />
                             : null }
                         { state.showUpdateItemModal
                             ? <ItemModal
                                 open={state.showUpdateItemModal}
                                 selectedItem={state.item}
-                                onClose={() => dispatch({ type: HIDE_UPDATE_ITEM_MODAL })}
+                                onClose={() => dispatch({ type: SHOW_UPDATE_ITEM_MODAL, payload: { show: false }})}
                                 onSaveChanges={updateItem} />
                             : null }
                         { state.showResultModal
                             ? <ResultModal
                                 open={state.showResultModal}
-                                itemId={state.itemId}
+                                barcodeId={state.barcodeId}
                                 onScanAgain={() => dispatch({ type: SCAN_AGAIN })}
-                                onClose={() => dispatch({ type: HIDE_RESULT_MODAL })}
+                                onClose={() => dispatch({ type: SHOW_RESULT_MODAL, payload: { show: false }})}
                                 onCreateNew={() => dispatch({ type: CREATE_NEW })} />
                             : null }
                     </Grid>

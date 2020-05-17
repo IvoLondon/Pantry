@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import * as Quagga from './quagga';
 import {
-    initStoreCodes,
     initCameraState,
     handleError,
     inputMapper
 } from './utilities';
 import {
+    storeCodes,
     whatUpdated,
     updateWithoutMutation
 } from './../../utilities';
@@ -29,8 +29,8 @@ import './style.scss';
 class Scanner extends Component {
     lastCode;
     state = {
-        storeCodes: [...initStoreCodes],
-        selectedStore: initStoreCodes[0].code,
+        storeCodes: [...storeCodes],
+        selectedBarcode: storeCodes[0].code,
         camerasList: [],
         activeCamera: 0,
         cameraState: { ...initCameraState },
@@ -98,7 +98,7 @@ class Scanner extends Component {
                 App.lastCode = code;
                 Quagga.stop();
                 Quagga.offDetected(detectedHandler);
-                if (result) App.props.onDetect(code);
+                if (result) App.props.onDetect({ barcodeId: code, barcodeType: this.state.selectedBarcode });
             }
         };
 
@@ -136,7 +136,7 @@ class Scanner extends Component {
         console.log(`Value of ${state} changed to ${value}`);
 
         this.setState({
-            selectedStore: e.target.value
+            selectedBarcode: e.target.value
         }, () => {
             this.setCameraState(state, value);
         });
@@ -268,7 +268,7 @@ class Scanner extends Component {
                                             labelId="store-dropdown-label"
                                             id="store-dropdown"
                                             name="decoder_readers"
-                                            value={this.state.selectedStore}
+                                            value={this.state.selectedBarcode}
                                             onChange={this.setBarcode}
                                             className="store-dropdown"
                                         >
