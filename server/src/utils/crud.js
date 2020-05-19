@@ -56,8 +56,7 @@ export const createOne = model => async (req, res) => {
         const doc = await model.create({ ...req.body })
         res.status(201).json({ data: doc })
     } catch (e) {
-        console.error(e)
-        res.status(400).send({ status: 400, message: e.errmsg }).end()
+        res.status(400).send({ message: e.errmsg }).end()
     }
 }
   

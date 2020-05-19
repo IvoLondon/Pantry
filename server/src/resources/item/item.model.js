@@ -14,7 +14,8 @@ const itemSchema = new mongoose.Schema(
             enum: ['ean_8', 'ean']
         },
         continuous: {
-            type: Boolean
+            type: Boolean,
+            default: false
         },
         name: {
             type: String,

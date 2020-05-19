@@ -1,27 +1,16 @@
 import request from 'supertest';
 import { app } from './../server';
 import { userData } from './../__mocks__/user';
-import mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
+import { startDB, stopDB } from './../__mocks__/db';
 
 describe('User tests', () => {
-    let mongoServer;
-    const opts = {
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-    };
     
     beforeAll(async () => {
-        mongoServer = new MongoMemoryServer();
-        const mongoUri = await mongoServer.getUri();
-        await mongoose.connect(mongoUri, opts, (err) => {
-            if (err) console.error(err);
-        });
+        startDB();
     })
 
-    afterAll(async() => {
-        await mongoose.disconnect();
-        await mongoServer.stop();
+    afterAll(async () => {
+        stopDB(); 
     })
 
     it('it fails when token does not exist', async () => {
