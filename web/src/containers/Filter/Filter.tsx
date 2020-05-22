@@ -16,6 +16,12 @@ import {
 } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/core/styles';
 import { useLocalStorage } from './../../utilities';
+import {
+    stateInterface,
+    actionInterface,
+    actionTypeHandler,
+    reducer
+} from './reducer';
 import './style.scss';
 
 const useStyles = makeStyles((theme) => ({
@@ -31,89 +37,47 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-const CLEAR_FILTER = 'CLER_FILTER',
-    SHOW_FILTER = 'SHOW_FILTER',
-    HANDLE_SEARCH = 'HANDLE_SEARCH',
-    HANDLE_SORTING = 'HANDLE_SORTING',
-    PRELOAD_DATA = 'PRELOAD_DATA';
-
-const reducer = (state, action) => {
-    if (action.type === CLEAR_FILTER) {
-        return {
-            ...state,
-            filterHasValues: false,
-            name: '',
-            macros: ''
-        }
-    }
-
-    if (action.type === SHOW_FILTER) {
-        return {
-            ...state,
-            isVisible: action.payload.isVisible
-        }
-    }
-
-    if (action.type === HANDLE_SORTING) {
-        return {
-            ...state,
-            filterHasValues: action.payload.filterHasValues,
-            macros: action.payload.macros
-        }
-    }
-
-    if (action.type === HANDLE_SEARCH) {
-        return {
-            ...state,
-            filterHasValues: action.payload.filterHasValues,
-            name: action.payload.name,
-        }
-    }
-
-    if (action.type === PRELOAD_DATA) {
-        return {
-            ...state,
-            isVisible: true,
-            filterHasValues: true,
-            ...action.payload,
-        }
-    }
-    return state;
-}
-const initialState = {
+const initialState: stateInterface = {
     isVisible: false,
     filterHasValues: false,
     name: '',
     macros: '',
 }
 
-const Filter = (props) => {
-    const [state, dispatch] = useReducer(reducer, initialState);
+interface filterInterface {
+    setFilter: ({}) => void,
+    filterMode: {
+        name?: string,
+        macros?: string,
+    }
+}
+
+const Filter: React.FC<filterInterface> = (props) => {
+    const [state, dispatch] = useReducer<React.Reducer<stateInterface, actionInterface>>(reducer, initialState);
     const [localStorageState, setlocalStorageState] = useLocalStorage('filter', {});
 
     const clearFilter = () => {
-        dispatch({ type: CLEAR_FILTER });
+        dispatch({ type: actionTypeHandler.CLEAR_FILTER });
         setlocalStorageState({});
         props.setFilter({});
     };
 
     useEffect(() => {
         if (Object.keys(localStorageState).length > 0) {
-            dispatch({ type: PRELOAD_DATA, payload: { ...localStorageState } });
+            dispatch({ type: actionTypeHandler.PRELOAD_DATA, payload: { ...localStorageState } });
             props.setFilter({ ...props.filterMode, ...localStorageState });
         }
     }, [state.isVisible]);
 
     const openFilter = () => {
-        dispatch({ type: SHOW_FILTER, payload: { isVisible: true }})
+        dispatch({ type: actionTypeHandler.SHOW_FILTER, payload: { isVisible: true }})
     };
 
     const closeFilter = () => {
-        dispatch({ type: SHOW_FILTER, payload: { isVisible: false }})
+        dispatch({ type: actionTypeHandler.SHOW_FILTER, payload: { isVisible: false }})
     };
 
-    const handleInput = (e) => {
-        
+    const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {    
         if (e.target.value.length > 2) {
             props.setFilter({ ...props.filterMode, name: e.target.value });
         } else {
@@ -121,7 +85,7 @@ const Filter = (props) => {
         }
 
         dispatch({
-            type: HANDLE_SEARCH,
+            type: actionTypeHandler.HANDLE_SEARCH,
             payload: {
                 filterHasValues: true,
                 name: e.target.value,
@@ -140,7 +104,7 @@ const Filter = (props) => {
         }
 
         dispatch({
-            type: HANDLE_SORTING,
+            type: actionTypeHandler.HANDLE_SORTING,
             payload: {
                 filterHasValues: true,
                 macros: e.target.value,
