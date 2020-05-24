@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const itemSchema = new mongoose.Schema(
+const store = new mongoose.Schema(
     {
         barcodeId: {
             type: String,
@@ -13,16 +13,9 @@ const itemSchema = new mongoose.Schema(
             lowercse: true,
             enum: ['ean_8', 'ean']
         },
-        continuous: {
-            type: Boolean,
-            default: false
-        },
         name: {
             type: String,
             required: true
-        },
-        quantity: {
-            type: Number
         },
         calories: {
             type: Number
@@ -51,4 +44,4 @@ const itemSchema = new mongoose.Schema(
     }
 )
 
-export const Item = mongoose.model('item', itemSchema);
+export const Store = mongoose.model('store', store);

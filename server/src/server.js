@@ -7,8 +7,8 @@ import cors from 'cors';
 import configs from './config/index';
 import { connect } from './utils/db';
 
-import itemRouter from './resources/item/item.router';
 import userRouter from './resources/user/user.router';
+import storeRouter from './resources/store/store.router';
 
 export const app = express();
 

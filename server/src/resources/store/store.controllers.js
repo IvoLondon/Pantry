@@ -1,3 +1,5 @@
+import { Store } from './store.model';
+
 export const getOne = model => async (req, res) => {
     try {
         const doc = await model
@@ -51,7 +53,7 @@ export const getMany = model => async (req, res) => {
 }
   
 export const createOne = model => async (req, res) => {
-    req.body
+    console.log(req.body)
     try {
         const doc = await model.create({ ...req.body })
         res.status(201).json({ data: doc })
@@ -100,13 +102,13 @@ export const removeOne = model => async (req, res) => {
         res.status(400).end()
     }
 }
-  
-export const crudControllers = model => ({
-    removeOne: removeOne(model),
-    updateOne: updateOne(model),
-    getMany: getMany(model),
-    getOne: getOne(model),
-    getOneByField: getOneByField(model),
-    createOne: createOne(model)
-})
+
+export const controllers = {
+    removeOne: removeOne(Store),
+    updateOne: updateOne(Store),
+    getMany: getMany(Store),
+    getOne: getOne(Store),
+    getOneByField: getOneByField(Store),
+    createOne: createOne(Store)
+}
   
