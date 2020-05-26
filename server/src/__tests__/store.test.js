@@ -6,7 +6,7 @@ import { itemData } from './../__mocks__/store';
 import { startDB, stopDB } from './../__mocks__/db';
 import mongoose from 'mongoose';
 
-describe('Items', () => {
+describe('Store items', () => {
     let token;
     
     beforeAll(async () => {
@@ -73,7 +73,7 @@ describe('Items', () => {
         await request(app).post('/api/store').send(itemData).set('Cookie', token);
         await request(app).post('/api/store').send(secondItem).set('Cookie', token);
         
-        const result = await request(app).get('/api/store/field').send({ barcodeId: itemData.barcodeId }).set('Cookie', token);
+        const result = await request(app).get('/api/store/find').send({ barcodeId: itemData.barcodeId }).set('Cookie', token);
 
         expect(result.statusCode).toBe(200);
         expect(result.body).toHaveProperty('data');
@@ -84,7 +84,7 @@ describe('Items', () => {
         await request(app).post('/api/store').send(itemData).set('Cookie', token);
         
         const itemToUpdate = await request(app)
-                                .get('/api/store/field')
+                                .get('/api/store/find')
                                 .send({ barcodeId: itemData.barcodeId })
                                 .set('Cookie', token);
         expect(itemToUpdate.body.data).toHaveProperty('_id');

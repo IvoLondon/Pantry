@@ -1,5 +1,5 @@
 import React, { createContext, useEffect, useState } from 'react';
-import { requestGetItems } from './../crud';
+import { requestItems } from './../crud';
 import Login from './Login/Login';
 import { requestCheckAuth } from './../crud';
 
@@ -25,7 +25,7 @@ const ItemsContext = (props) => {
 
     const fetchData = async () => {
         try {
-            const response = await requestGetItems();
+            const response = await requestItems();
             getItems(response.data);
         } catch (e) {
             console.log(e);

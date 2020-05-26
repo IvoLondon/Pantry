@@ -8,6 +8,7 @@ import configs from './config/index';
 import { connect } from './utils/db';
 
 import userRouter from './resources/user/user.router';
+import stockRouter from './resources/stock/stock.router';
 import storeRouter from './resources/store/store.router';
 
 export const app = express();
@@ -21,7 +22,8 @@ app.use(urlencoded({ extended: true }));
 app.use(morgan('dev'));
 
 app.use('/auth', userRouter);
-app.use('/api', itemRouter);
+app.use('/api', stockRouter);
+app.use('/api', storeRouter);
 
 app.get('/', (req, res) => res.status(200).send('Works'));
 

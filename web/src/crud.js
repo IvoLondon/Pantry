@@ -1,9 +1,9 @@
-export const requestGetItems = () => {
+export const requestItems = () => {
     const options = {
         method: 'GET',
         credentials: 'include'
     }
-    return fetch(`${process.env.REACT_APP_SERVER}/api/item`, options)
+    return fetch(`${process.env.REACT_APP_SERVER}/api/stock`, options)
         .then(response => response.json());
 };
 

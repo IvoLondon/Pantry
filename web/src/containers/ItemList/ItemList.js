@@ -36,11 +36,11 @@ const ItemList = () => {
         [filterMode, setFilter] = useState({}),
         [modal, setModalState] = useState(false);
 
-    const toggleModal = (item) => {
-        if (!item) {
+    const toggleModal = (unit) => {
+        if (!unit) {
             setSelectedItem(null);
         } else {
-            setSelectedItem(item);
+            setSelectedItem(unit);
         }
         setModalState(!modal);
     };
@@ -77,8 +77,7 @@ const ItemList = () => {
     };
 
     const classes = useStyles();
-    const itemsRender = () => {
-        let itemsList = [...items];
+    const itemsRender = (itemsList) => {
         if (Object.keys(filterMode).length) {
             if (filterMode.hasOwnProperty('name') && filterMode.name.length > 2) {
                 const val = filterMode.name;
@@ -98,25 +97,25 @@ const ItemList = () => {
                 });
             }
         }
-        return itemsList.map(item => {
+        return itemsList.map(unit => {
             return (
-                <React.Fragment key={item.barcode}>
+                <React.Fragment key={unit.item.barcode}>
                     <ListItem button>
                         <ListItemIcon>
-                            <Badge badgeContent={item.quantity} showZero color="secondary">
+                            <Badge badgeContent={unit.quantity} showZero color="secondary">
                                 {/* TODO: UPDATE ICONS COLOUR */}
                                 <StoreIcon color="primary" />
                             </Badge>
                         </ListItemIcon>
-                        <ListItemText primary={item.name} onClick={() => toggleModal(item)} />
-                        <ListItemText primary={item.macros.carb.total} />
-                        <ListItemText primary={item.macros.fat.total} />
-                        <ListItemText primary={item.macros.protein} />
+                        <ListItemText primary={unit.item.name} onClick={() => toggleModal(unit)} />
+                        <ListItemText primary={unit.item.macros.carb.total} />
+                        <ListItemText primary={unit.item.macros.fat.total} />
+                        <ListItemText primary={unit.item.macros.protein} />
 
                         <ButtonGroup variant="contained" color="default">
-                            <Button onClick={() => updateItem(item, 'incr')}>+</Button>
-                            <Button>{item.quantity}</Button>
-                            <Button onClick={() => updateItem(item, 'decr')}>-</Button>
+                            <Button onClick={() => updateItem(unit, 'incr')}>+</Button>
+                            <Button>{unit.quantity}</Button>
+                            <Button onClick={() => updateItem(unit, 'decr')}>-</Button>
                         </ButtonGroup>
                     </ListItem>
                     <Divider className={classes.root} />
@@ -130,7 +129,7 @@ const ItemList = () => {
             <Container maxWidth="md">
                 <Grid container direction="row" justify="center" alignItems="center">
                     <List component="nav" className="ItemList" aria-label="main mailbox folders">
-                        {itemsRender()}
+                        {itemsRender(items)}
                     </List>
                     <ItemModal
                         open={modal}

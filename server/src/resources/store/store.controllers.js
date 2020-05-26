@@ -1,4 +1,6 @@
 import { Store } from './store.model';
+import { Stock } from './../stock/stock.model';
+import { User } from './../user/user.model';
 
 export const getOne = model => async (req, res) => {
     try {
@@ -51,12 +53,36 @@ export const getMany = model => async (req, res) => {
         res.status(400).end()
     }
 }
-  
-export const createOne = model => async (req, res) => {
-    console.log(req.body)
+
+export const createItemInStore = async (req, res) => {
     try {
-        const doc = await model.create({ ...req.body })
+        const doc = await Store.create({ ...req.body })
         res.status(201).json({ data: doc })
+    } catch (e) {
+        res.status(400).send({ message: e.errmsg }).end()
+    }
+}
+  
+export const createItemAndAddInStock = async (req, res) => {
+    if (!req.body ||
+        !req.body.stock ||
+        !req.body.store) res.status(400).send({ message: 'Missing creation data' }).end();
+    
+    try {
+        const user = await User.findOne({ email: req.authUser });
+        const store = await Store.create(req.body.store)
+        const stock = await Stock.findOne({ owner: [user._id] });
+        const updatedStock = await Stock.findOneAndUpdate({ _id: stock._id },
+                { 
+                    items: [
+                        ...stock.items,
+                        {
+                            item: store._id,
+                            ...req.body.stock
+                        }
+                    ]
+                })
+        res.status(201).send({ data: updatedStock }).end()
     } catch (e) {
         res.status(400).send({ message: e.errmsg }).end()
     }
@@ -109,6 +135,7 @@ export const controllers = {
     getMany: getMany(Store),
     getOne: getOne(Store),
     getOneByField: getOneByField(Store),
-    createOne: createOne(Store)
+    createItemInStore: createItemInStore,
+    createItemAndAddInStock: createItemAndAddInStock
 }
   

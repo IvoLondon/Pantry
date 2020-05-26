@@ -28,7 +28,7 @@ const signInUser = async (req, res) => {
                 } else if (!same) {
                     res.status(401).send({ error: 'Incorrect email or password' });
                 } else {
-                    res = setCookie(res, { email })
+                    res = setCookie(res, email)
                     res.sendStatus(200);
                 }
             });
@@ -50,7 +50,7 @@ const checkAuth = async (req, res) => {
             if (err) {
                 res.status(401).send('Unauthorized: Invalid token');
             } else {
-                res = setCookie(res, { email: decoded.email })
+                res = setCookie(res, decoded.email)
                 res.status(200).send({ message: 'User token is valid' });
             }
         });

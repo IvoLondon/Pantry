@@ -6,9 +6,12 @@ const router = Router();
 router.use(withAuth);
 router.route('/store')
     .get(controllers.getMany)
-    .post(controllers.createOne);
+    .post(controllers.createItemInStore);
 
-router.route('/store/field')
+router.route('/store/add-to-stock')
+    .post(controllers.createItemAndAddInStock);
+
+router.route('/store/find')
     .get(controllers.getOneByField)
 
 router.route('/store/:id')
