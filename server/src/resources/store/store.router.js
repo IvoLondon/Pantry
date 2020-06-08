@@ -8,9 +8,6 @@ router.route('/store')
     .get(controllers.getMany)
     .post(controllers.createItemInStore);
 
-router.route('/store/add-to-stock')
-    .post(controllers.createItemAndAddInStock);
-
 router.route('/store/find')
     .get(controllers.getOneByField)
 

@@ -12,6 +12,7 @@ import {
 } from './../../crud';
 import { Context } from './../ItemsContext';
 import HeaderControls from './../../components/HeaderControls/HeaderControls';
+import NewProductModal from '../../components/NewProductModal/NewProductModal';
 import ItemModal from './../../components/ItemModal/ItemModal';
 import ResultModal from './../../components/ResultModal/ResultModal';
 
@@ -53,7 +54,6 @@ const Header = () => {
     };
 
     const createNewItem = async (item) => {
-        debugger
         try {
             await requestCreateItem(item);
             getItems([
@@ -96,15 +96,18 @@ const Header = () => {
                                 : null }
                         </Suspense>
                         { state.showNewItemModal
-                            ? <ItemModal
+                            ? <NewProductModal
                                 open={state.showNewItemModal}
+                                createMode={true}
                                 barcodeId={state.barcodeId}
+                                barcodeType={state.barcodeType}
                                 onClose={() => dispatch({ type: SHOW_NEW_ITEM_MODAL, payload: { show: false }})}
                                 onSaveChanges={createNewItem} />
                             : null }
                         { state.showUpdateItemModal
                             ? <ItemModal
                                 open={state.showUpdateItemModal}
+                                createMode={false}
                                 selectedItem={state.item}
                                 onClose={() => dispatch({ type: SHOW_UPDATE_ITEM_MODAL, payload: { show: false }})}
                                 onSaveChanges={updateItem} />

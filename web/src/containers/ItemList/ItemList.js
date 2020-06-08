@@ -98,6 +98,7 @@ const ItemList = () => {
             }
         }
         return itemsList.map(unit => {
+            if (!unit.item) return
             return (
                 <React.Fragment key={unit.item.barcode}>
                     <ListItem button>

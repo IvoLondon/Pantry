@@ -61,7 +61,6 @@ const getStockItems = async (req, res) => {
     try {
         const user = await User.findOne({ email: req.authUser });
         const stock = await Stock.findOne({ owner: [user._id]}).populate('items.item').exec();
-        console.log(stock)
         res.status(200).send({ data: stock.items }).end();
     } catch (e) {
         res.status(400).send({ message: e }).end();

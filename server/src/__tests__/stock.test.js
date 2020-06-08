@@ -12,12 +12,12 @@ describe('Stocks', () => {
         await request(app).post('/auth/signup').send(userData);
         let signUserIn = await request(app).post('/auth/signin').send(userData);
         token = signUserIn.header['set-cookie'];
-    })
+    });
 
     afterAll(async() => {
         stopDB();
-    })
-
+    });
+ 
     it('creates a new stock with owner', async () => {
         const result = await request(app).post('/api/stock').set('Cookie', token)
         expect(result.statusCode).toBe(200);

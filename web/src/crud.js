@@ -23,18 +23,27 @@ export const requestSingleItem = (id) => {
         method: 'GET',
         credentials: 'include',
     }
-    return fetch(`${process.env.REACT_APP_SERVER}/api/item/${id}`, options)
+    return fetch(`${process.env.REACT_APP_SERVER}/api/store/${id}`, options)
         .then(response => response.json());
 };
 
 export const requestCreateItem = (item) => {
+    const newItem = {
+        stock: {
+            quantity: item.quantity,
+            continuous: item.continuous
+        },
+        store: {
+            ...item.item
+        }
+    }
     const options = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(item),
+        body: JSON.stringify(newItem),
         credentials: 'include',
     };
-    return fetch(`${process.env.REACT_APP_SERVER}/api/item`, options)
+    return fetch(`${process.env.REACT_APP_SERVER}/api/store`, options)
         .then(response => response.json());
 };
 

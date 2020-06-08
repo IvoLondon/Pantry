@@ -1,0 +1,9 @@
+.ItemModal {
+    &__text-field {
+        .MuiInputBase-root {
+            &:before {
+                border: 0;
+            }
+        }
+    }
+}

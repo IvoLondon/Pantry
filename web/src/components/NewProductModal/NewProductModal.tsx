@@ -28,21 +28,23 @@ import {
 interface Props {
     open: boolean,
     createMode: boolean,
+    barcodeId: string,
+    barcodeType: string,
     item: ItemInterface,
     selectedItem: ItemInterface,
     onSaveChanges?: (v: ItemInterface) => void | {},
     onClose: (v: boolean) => boolean
 }
 
-const ItemModal: React.FC<Props> = (props) => {
+const NewProductModal: React.FC<Props> = (props) => {
     const INITIAL_ITEM: ItemInterface = {
-        quantity: 0,
+        quantity: 1,
         continuous: false,
         item: {
             name: '',
             calories: 0,
-            barcodeId: '',
-            barcodeType: '',
+            barcodeId: props.barcodeId,
+            barcodeType: props.barcodeType,
             macros: {
                 carb: { total: 0, sugar: 0 },
                 fat: { total: 0, saturated: 0, unsaturated: 0, trans: 0 },
@@ -52,31 +54,12 @@ const ItemModal: React.FC<Props> = (props) => {
     };
 
     const [item, getItem] = useState<ItemInterface>(INITIAL_ITEM);
-    const [editMode, setEditMode] = useState(false);
-
-    useEffect(() => {
-        if (props.open) {
-            if (props.selectedItem) {
-                getItem(props.selectedItem);
-            } else {
-                getItem(INITIAL_ITEM);
-                setEditMode(true);
-            }
-        }
-        return () => {
-            getItem(INITIAL_ITEM);
-            setEditMode(false);
-        };
-    }, [props.open]);
 
     const updateField = (e: React.ChangeEvent<HTMLInputElement>) => {
-        let updatedItem = { ...item };
         const name = e.target.name;
         const value = e.target.value;
         const fieldToUpdate = name.split('.');
-
-        updatedItem = updateState(updatedItem, fieldToUpdate, value);
-        getItem(updatedItem);
+        getItem(updateState(item, fieldToUpdate, value));
     };
 
     const updateState = (updatedItem, field = [], value) => {
@@ -90,7 +73,6 @@ const ItemModal: React.FC<Props> = (props) => {
     };
 
     const onSaveChanges = () => {
-        setEditMode(false);
         props.onSaveChanges(item);
     };
 
@@ -106,50 +88,45 @@ const ItemModal: React.FC<Props> = (props) => {
 
     // TODO: render the data auto
     const rows = [
-        createData('Calories', item?.item?.calories, 'calories'),
-        createData('Protein', item?.item?.macros?.protein, 'macros.protein'),
-        createData('Carbs', item?.item?.macros?.carb?.total, 'macros.carb.total'),
-        createData(' - sugar', item?.item?.macros?.carb?.sugar, 'macros.carb.sugar'),
-        createData('Fat', item?.item?.macros?.fat?.total, 'macros.fat.total'),
-        createData(' - saturated', item?.item?.macros?.fat?.saturated, 'macros.fat.saturated'),
-        createData(' - unsaturated', item?.item?.macros?.fat?.unsaturated, 'macros.fat.unsaturated'),
-        createData(' - trans', item?.item?.macros?.fat?.trans, 'macros.fat.trans')
+        createData('Calories', item?.item?.calories, 'item.calories'),
+        createData('Protein', item?.item?.macros?.protein, 'item.macros.protein'),
+        createData('Carbs', item?.item?.macros?.carb?.total, 'item.macros.carb.total'),
+        createData(' - sugar', item?.item?.macros?.carb?.sugar, 'item.macros.carb.sugar'),
+        createData('Fat', item?.item?.macros?.fat?.total, 'item.macros.fat.total'),
+        createData(' - saturated', item?.item?.macros?.fat?.saturated, 'item.macros.fat.saturated'),
+        createData(' - unsaturated', item?.item?.macros?.fat?.unsaturated, 'item.macros.fat.unsaturated'),
+        createData(' - trans', item?.item?.macros?.fat?.trans, 'item.macros.fat.trans')
     ];
     return (
         <Box className="ItemModal">
             <Dialog open={props.open} onClose={() => props.onClose(false)}>
                 <form>
                     <DialogTitle disableTypography={true} id="dialog-title">
-                        { props.createMode ?
-                            <Box width="100%">
-                                <TextField
-                                    name="barcode"
-                                    label="Barcode*"
-                                    disabled={!editMode}
+                        <Box width="100%">
+                            <TextField
+                                name="item.barcodeId"
+                                label="Barcode*"
+                                onChange={updateField}
+                                className="ItemModal__text-field"
+                                defaultValue={item.item.barcodeId} />
+                            <FormControl>
+                                <InputLabel className="store-dropdown-label" id="store-dropdown-label">Select your store:</InputLabel>
+                                <Select
+                                    name="item.barcodeType"
+                                    labelId="barcode-type-label"
+                                    value={item.item.barcodeType}
                                     onChange={updateField}
-                                    className="ItemModal__text-field"
-                                    defaultValue={item.item.barcodeId} />
-                                <FormControl>
-                                    <InputLabel className="store-dropdown-label" id="store-dropdown-label">Select your store:</InputLabel>
-                                    <Select
-                                        name="barcodeType"
-                                        labelId="barcode-type-label"
-                                        value={storeCodes[0].code}
-                                        onChange={updateField}
-                                        className="barcode-type-dropdown"
-                                    >
-                                        {getStoreCodes(storeCodes)}
-                                    </Select>
-                                </FormControl>
-                            </Box>
-                        : null }
+                                    className="barcode-type-dropdown">
+                                    {getStoreCodes(storeCodes)}
+                                </Select>
+                            </FormControl>
+                        </Box>
                         <Box display="flex" width="100%">
                             <Box width="100%">
                                 <TextField
-                                    name="name"
+                                    name="item.name"
                                     className="ItemModal__text-field"
-                                    label={props.createMode ? 'Product name*' : item?.item?.barcodeId}
-                                    disabled={!editMode}
+                                    label="Product name*"
                                     onChange={updateField}
                                     defaultValue={item?.item?.name} />
                             </Box>
@@ -158,7 +135,6 @@ const ItemModal: React.FC<Props> = (props) => {
                                     className="ItemModal__text-field"
                                     id="item-quantity"
                                     label="Quantity"
-                                    disabled={!editMode}
                                     name="quantity"
                                     onChange={updateField}
                                     placeholder="0"
@@ -178,12 +154,11 @@ const ItemModal: React.FC<Props> = (props) => {
                                         <TableCell colSpan={1} align="right">
                                             <TextField
                                                 className="ItemModal__text-field"
-                                                disabled={!editMode}
                                                 placeholder="0"
                                                 defaultValue={row.calories}
                                                 name={row.ref}
                                                 onChange={updateField}
-                                                inputProps={{ style: { textAlign: 'right' } }} />
+                                                inputProps={{ style: { textAlign: 'right' }}} />
                                         </TableCell>
                                     </TableRow>
                                 ))}
@@ -191,19 +166,12 @@ const ItemModal: React.FC<Props> = (props) => {
                         </Table>
                     </DialogContent>
                     <DialogActions>
-                        {!editMode
-                            ? <Button autoFocus onClick={() => setEditMode(true)} color="primary">
-                                Edit
-                            </Button>
-                            : <>
-                                <Button autoFocus onClick={() => props.onClose(false)} color="primary">
-                                    Close
-                                </Button>
-                                <Button autoFocus onClick={onSaveChanges} color="primary">
-                                    Save changes
-                                </Button>
-                            </>
-                        }
+                        <Button autoFocus onClick={() => props.onClose(false)} color="primary">
+                            Close
+                        </Button>
+                        <Button autoFocus onClick={onSaveChanges} color="primary">
+                            Save changes
+                        </Button>
                     </DialogActions>
                 </form>
             </Dialog>
@@ -211,4 +179,4 @@ const ItemModal: React.FC<Props> = (props) => {
     );
 };
 
-export default ItemModal;
+export default NewProductModal;

@@ -53,38 +53,29 @@ export const getMany = model => async (req, res) => {
         res.status(400).end()
     }
 }
-
-export const createItemInStore = async (req, res) => {
-    try {
-        const doc = await Store.create({ ...req.body })
-        res.status(201).json({ data: doc })
-    } catch (e) {
-        res.status(400).send({ message: e.errmsg }).end()
-    }
-}
   
-export const createItemAndAddInStock = async (req, res) => {
-    if (!req.body ||
-        !req.body.stock ||
+export const createItemInStore = async (req, res) => {
+    if (!req.body &&
         !req.body.store) res.status(400).send({ message: 'Missing creation data' }).end();
     
     try {
-        const user = await User.findOne({ email: req.authUser });
-        const store = await Store.create(req.body.store)
-        const stock = await Stock.findOne({ owner: [user._id] });
-        const updatedStock = await Stock.findOneAndUpdate({ _id: stock._id },
+        let createdItem = await Store.create(req.body.store)
+        if (req.body.stock) {
+            const user = await User.findOne({ email: req.authUser });
+            const stock = await Stock.findOne({ owner: [user._id] });
+            createdItem = await Stock.findOneAndUpdate({ _id: stock._id },
                 { 
-                    items: [
-                        ...stock.items,
-                        {
-                            item: store._id,
+                    $push: { 
+                        items: {
+                            item: createdItem._id,
                             ...req.body.stock
                         }
-                    ]
-                })
-        res.status(201).send({ data: updatedStock }).end()
+                    }
+                }, { new: true })
+        }
+        res.status(201).send({ data: createdItem }).end()
     } catch (e) {
-        res.status(400).send({ message: e.errmsg }).end()
+        res.status(400).send({ message: e }).end()
     }
 }
   
@@ -135,7 +126,6 @@ export const controllers = {
     getMany: getMany(Store),
     getOne: getOne(Store),
     getOneByField: getOneByField(Store),
-    createItemInStore: createItemInStore,
-    createItemAndAddInStock: createItemAndAddInStock
+    createItemInStore: createItemInStore
 }
   
