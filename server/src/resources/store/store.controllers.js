@@ -40,20 +40,6 @@ export const getOneByField = model => async (req, res) => {
     }
 }
   
-export const getMany = model => async (req, res) => {
-    try {
-        const docs = await model
-            .find({})
-            .lean()
-            .exec()
-  
-        res.status(200).json({ data: docs })
-    } catch (e) {
-        console.error(e)
-        res.status(400).end()
-    }
-}
-  
 export const createItemInStore = async (req, res) => {
     if (!req.body &&
         !req.body.store) res.status(400).send({ message: 'Missing creation data' }).end();
@@ -123,7 +109,6 @@ export const removeOne = model => async (req, res) => {
 export const controllers = {
     removeOne: removeOne(Store),
     updateOne: updateOne(Store),
-    getMany: getMany(Store),
     getOne: getOne(Store),
     getOneByField: getOneByField(Store),
     createItemInStore: createItemInStore

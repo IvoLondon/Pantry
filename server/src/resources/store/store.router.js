@@ -5,7 +5,6 @@ import withAuth from './../../middlewares/auth';
 const router = Router();
 router.use(withAuth);
 router.route('/store')
-    .get(controllers.getMany)
     .post(controllers.createItemInStore);
 
 router.route('/store/find')
