@@ -2,20 +2,38 @@ import { Store } from './store.model';
 import { Stock } from './../stock/stock.model';
 import { User } from './../user/user.model';
 
-export const getOne = model => async (req, res) => {
+export const getOne = async (req, res) => {
     try {
-        const doc = await model
+        const user = await User.findOne({ email: req.authUser });
+        const itemInStore = await Store
             .findOne({ barcodeId: req.params.id })
             .lean()
-            .exec()
-        if (!doc) {
+            .exec();
+
+        if (!itemInStore) {
             return res.status(400).send({message: "Item does not exist"}).end()
         }
-  
-        res.status(200).json({ data: doc })
+
+        const stock = await Stock.findOne({owner: [user._id]});
+        let itemInStock = {
+            quantity: 0,
+            continuous: false,
+        };
+        if(stock) {
+            for(let i of stock.items) {
+                if(JSON.stringify(stock.items[0].item) == JSON.stringify(itemInStore._id)) {
+                    itemInStock = {
+                        quantity: i.quantity,
+                        continuous: i.continuous
+                    }
+                }
+            }
+        }
+        
+        res.status(200).json({ data: {item: itemInStore, ...itemInStock} })
     } catch (e) {
         console.error(e)
-        res.status(400).end()
+        res.status(400).send({message: e}).end()
     }
 }
 
@@ -109,7 +127,7 @@ export const removeOne = model => async (req, res) => {
 export const controllers = {
     removeOne: removeOne(Store),
     updateOne: updateOne(Store),
-    getOne: getOne(Store),
+    getOne: getOne,
     getOneByField: getOneByField(Store),
     createItemInStore: createItemInStore
 }
