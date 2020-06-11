@@ -1,6 +1,7 @@
 import { Store } from './store.model';
 import { Stock } from './../stock/stock.model';
 import { User } from './../user/user.model';
+import mongoose from 'mongoose';
 
 export const getOne = async (req, res) => {
     try {
@@ -16,7 +17,7 @@ export const getOne = async (req, res) => {
 
         const stock = await Stock.findOne({owner: [user._id]});
         let itemInStock = {
-            quantity: 0,
+            quantity: 1,
             continuous: false,
         };
         if(stock) {
@@ -83,24 +84,38 @@ export const createItemInStore = async (req, res) => {
     }
 }
   
-export const updateOne = model => async (req, res) => {
+export const updateOne = async (req, res) => {
     try {
-        const updatedDoc = await model
-            .findOneAndUpdate(
-            {
-                _id: req.params.id
-            },
-            req.body,
-            { new: true }
-            )
-            .lean()
-            .exec()
-    
-        if (!updatedDoc) {
-            return res.status(400).end()
+        let stockItem = {};
+        const { item:unit, quantity, continuous } = req.body;
+        const storeItem = await Store.findOneAndUpdate({ _id: req.params.id },
+            unit,
+            { new: true }).lean().exec();
+        if (!storeItem) {
+            return res.status(400).end() 
         }
-    
-        res.status(200).json({ data: updatedDoc })
+        
+        if (req.body.quantity && req.body.quantity > 0) {
+            const user = await User.findOne({ email: req.authUser });
+            try {
+                await Stock.findOneAndUpdate({ owner: [user._id], "items.item": mongoose.Types.ObjectId(req.params.id)},
+                    {$set: {"items.$.quantity": quantity, "items.$.continuous": continuous }}, { new: true, upsert: true });
+            } catch(e) {
+                if (e.code === 2) {
+                    // ADDS THE ITEM
+                    await Stock.findOneAndUpdate({ owner: [user._id]},
+                        { $push: {
+                            "items": {
+                                    "quantity": quantity,
+                                    "continuous": continuous,
+                                    "item": mongoose.Types.ObjectId(req.params.id),
+                                }
+                            }
+                        }, { new: true });
+                    }
+                }
+        }
+        res.status(200).json({ data: { unit: storeItem, quantity: quantity, continuous: continuous } })
     } catch (e) {
         console.error(e)
         res.status(400).end()
@@ -126,7 +141,7 @@ export const removeOne = model => async (req, res) => {
 
 export const controllers = {
     removeOne: removeOne(Store),
-    updateOne: updateOne(Store),
+    updateOne: updateOne,
     getOne: getOne,
     getOneByField: getOneByField(Store),
     createItemInStore: createItemInStore

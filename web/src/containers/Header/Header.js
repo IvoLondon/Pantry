@@ -66,16 +66,24 @@ const Header = () => {
         }
     };
 
-    const updateItem = async (newItem) => {
+    const updateItem = async (unit) => {
         try {
-            await requestUpdateItem(newItem._id, newItem);
-            getItems(items.map(i => {
-                if (i._id === newItem._id) {
-                    return newItem;
+            let response = await requestUpdateItem(unit.item._id, unit);
+            if (response.status === 200) {
+                let itemExists = false;
+                let updatedItemList = items.map(i => {
+                    if (i.item._id === unit.item._id) {
+                        itemExists = true;
+                        return unit;
+                    }
+                    return i;
+                })
+                if (!itemExists) {
+                    updatedItemList.push(unit)
                 }
-                return i;
-            }));
-            dispatch({ type: SHOW_UPDATE_ITEM_MODAL, payload: { show: false }});
+                getItems(updatedItemList);
+                dispatch({ type: SHOW_UPDATE_ITEM_MODAL, payload: { show: false }});
+            }
         } catch (e) {
             return new Error(e);
         }

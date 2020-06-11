@@ -32,48 +32,44 @@ const useStyles = makeStyles((theme) => ({
 
 const ItemList = () => {
     const { items, getItems } = useContext(Context);
-    const [selectedItem, setSelectedItem] = useState(null),
+    const [selectedUnit, setSelectedUnit] = useState(null),
         [filterMode, setFilter] = useState({}),
         [modal, setModalState] = useState(false);
 
     const toggleModal = (unit) => {
         if (!unit) {
-            setSelectedItem(null);
+            setSelectedUnit(null);
         } else {
-            setSelectedItem(unit);
+            setSelectedUnit(unit);
         }
         setModalState(!modal);
     };
 
-    const updateItem = (item, action) => {
-        const newList = items.filter(x => x._id !== item._id);
-        const newItem = { ...item };
-        const idx = items.findIndex(x => x._id === item._id);
+    const updateItem = async (unit, action) => {
+        const newList = items.filter(x => x.item._id !== unit.item._id);
+        const newUnit = { ...unit };
+        const idx = items.findIndex(x => x.item._id === unit.item._id);
 
         if (action === 'decr') {
-            newItem.quantity--;
+            newUnit.quantity--;
         } else if (action === 'incr') {
-            newItem.quantity++;
+            newUnit.quantity++;
         }
-        newList.splice(idx, 0, newItem);
+        newList.splice(idx, 0, newUnit);
         // TODO: fix to use debounce
         getItems(newList);
-        debounce(async () => {
-            try {
-                await requestUpdateItem(item._id, { quantity: newItem.quantity });
-            } catch (e) {
-                console.log(e);
-            }
-        }, 1000, false)();
-    };
-
-    const updateItemNutrition = async (item) => {
         try {
-            updateItem(item);
-            await requestUpdateItem(item._id, item);
+            await requestUpdateItem(newUnit.item._id, newUnit);
         } catch (e) {
-            return new Error(e);
+            console.log(e);
         }
+        // debounce(async () => {
+        //     try {
+        //         await requestUpdateItem(newUnit.item._id, newUnit);
+        //     } catch (e) {
+        //         console.log(e);
+        //     }
+        // }, 1000, false)();
     };
 
     const classes = useStyles();
@@ -100,7 +96,7 @@ const ItemList = () => {
         return itemsList.map(unit => {
             if (!unit.item) return
             return (
-                <React.Fragment key={unit.item.barcode}>
+                <React.Fragment key={unit.item.barcodeId}>
                     <ListItem button>
                         <ListItemIcon>
                             <Badge badgeContent={unit.quantity} showZero color="secondary">
@@ -109,9 +105,6 @@ const ItemList = () => {
                             </Badge>
                         </ListItemIcon>
                         <ListItemText primary={unit.item.name} onClick={() => toggleModal(unit)} />
-                        <ListItemText primary={unit.item.macros.carb.total} />
-                        <ListItemText primary={unit.item.macros.fat.total} />
-                        <ListItemText primary={unit.item.macros.protein} />
 
                         <ButtonGroup variant="contained" color="default">
                             <Button onClick={() => updateItem(unit, 'incr')}>+</Button>
@@ -134,10 +127,10 @@ const ItemList = () => {
                     </List>
                     <ItemModal
                         open={modal}
-                        selectedItem={selectedItem}
+                        selectedItem={selectedUnit}
                         onClose={toggleModal}
-                        onSaveChanges={updateItemNutrition} />
-                        <Filter filterMode={filterMode} setFilter={setFilter} />
+                        onSaveChanges={updateItem} />
+                    <Filter filterMode={filterMode} setFilter={setFilter} />
                 </Grid>
             </Container>
         </Box>

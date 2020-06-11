@@ -7,15 +7,15 @@ export const requestItems = () => {
         .then(response => response.json());
 };
 
-export const requestUpdateItem = (id, item) => {
-    if (!id) return new Error('Missing ID');
+export const requestUpdateItem = (id, unit) => {
+    if (!id) throw new Error('Missing ID');
     const options = {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify(item)
+        body: JSON.stringify(unit)
     };
-    return fetch(`${process.env.REACT_APP_SERVER}/api/item/${id}`, options);
+    return fetch(`${process.env.REACT_APP_SERVER}/api/store/${id}`, options);
 };
 
 export const requestSingleItem = (id) => {

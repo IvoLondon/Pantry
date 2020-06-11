@@ -51,47 +51,45 @@ const ItemModal: React.FC<Props> = (props) => {
         }
     };
 
-    const [item, getItem] = useState<ItemInterface>(INITIAL_ITEM);
+    const [unit, setUnit] = useState<ItemInterface>(INITIAL_ITEM);
     const [editMode, setEditMode] = useState(false);
 
     useEffect(() => {
         if (props.open) {
             if (props.selectedItem) {
-                getItem(props.selectedItem);
+                setUnit(props.selectedItem);
             } else {
-                getItem(INITIAL_ITEM);
+                setUnit(INITIAL_ITEM);
                 setEditMode(true);
             }
         }
         return () => {
-            getItem(INITIAL_ITEM);
+            setUnit(INITIAL_ITEM);
             setEditMode(false);
         };
     }, [props.open]);
 
     const updateField = (e: React.ChangeEvent<HTMLInputElement>) => {
-        let updatedItem = { ...item };
         const name = e.target.name;
         const value = e.target.value;
         const fieldToUpdate = name.split('.');
 
-        updatedItem = updateState(updatedItem, fieldToUpdate, value);
-        getItem(updatedItem);
+        setUnit(updateStateHelper({...unit}, fieldToUpdate, value));
     };
 
-    const updateState = (updatedItem, field = [], value) => {
+    const updateStateHelper = (unitToUpdate, field = [], value) => {
         // TODO: USE LODASH CLONE AND SETWITH
-        if (updatedItem.hasOwnProperty(field[0]) && typeof updatedItem[field[0]] !== 'object') {
-            updatedItem[field[0]] = isNaN(Number(value)) ? value : Number(value);
+        if (unitToUpdate.hasOwnProperty(field[0]) && typeof unitToUpdate[field[0]] !== 'object') {
+            unitToUpdate[field[0]] = isNaN(Number(value)) ? value : Number(value);
         } else {
-            updateState(updatedItem[field[0]], field.slice(1), value);
+            updateStateHelper(unitToUpdate[field[0]], field.slice(1), value);
         }
-        return updatedItem;
+        return unitToUpdate;
     };
 
     const onSaveChanges = () => {
         setEditMode(false);
-        props.onSaveChanges(item);
+        props.onSaveChanges(unit);
     };
 
     const createData = (name, calories, ref) => {
@@ -106,14 +104,14 @@ const ItemModal: React.FC<Props> = (props) => {
 
     // TODO: render the data auto
     const rows = [
-        createData('Calories', item?.item?.calories, 'calories'),
-        createData('Protein', item?.item?.macros?.protein, 'macros.protein'),
-        createData('Carbs', item?.item?.macros?.carb?.total, 'macros.carb.total'),
-        createData(' - sugar', item?.item?.macros?.carb?.sugar, 'macros.carb.sugar'),
-        createData('Fat', item?.item?.macros?.fat?.total, 'macros.fat.total'),
-        createData(' - saturated', item?.item?.macros?.fat?.saturated, 'macros.fat.saturated'),
-        createData(' - unsaturated', item?.item?.macros?.fat?.unsaturated, 'macros.fat.unsaturated'),
-        createData(' - trans', item?.item?.macros?.fat?.trans, 'macros.fat.trans')
+        createData('Calories', unit?.item?.calories, 'item.calories'),
+        createData('Protein', unit?.item?.macros?.protein, 'item.macros.protein'),
+        createData('Carbs', unit?.item?.macros?.carb?.total, 'item.macros.carb.total'),
+        createData(' - sugar', unit?.item?.macros?.carb?.sugar, 'item.macros.carb.sugar'),
+        createData('Fat', unit?.item?.macros?.fat?.total, 'item.macros.fat.total'),
+        createData(' - saturated', unit?.item?.macros?.fat?.saturated, 'item.macros.fat.saturated'),
+        createData(' - unsaturated', unit?.item?.macros?.fat?.unsaturated, 'item.macros.fat.unsaturated'),
+        createData(' - trans', unit?.item?.macros?.fat?.trans, 'item.macros.fat.trans')
     ];
     return (
         <Box className="ItemModal">
@@ -128,7 +126,7 @@ const ItemModal: React.FC<Props> = (props) => {
                                     disabled={!editMode}
                                     onChange={updateField}
                                     className="ItemModal__text-field"
-                                    defaultValue={item.item.barcodeId} />
+                                    defaultValue={unit.item.barcodeId} />
                                 <FormControl>
                                     <InputLabel className="store-dropdown-label" id="store-dropdown-label">Select your store:</InputLabel>
                                     <Select
@@ -148,10 +146,10 @@ const ItemModal: React.FC<Props> = (props) => {
                                 <TextField
                                     name="name"
                                     className="ItemModal__text-field"
-                                    label={props.createMode ? 'Product name*' : item?.item?.barcodeId}
+                                    label={props.createMode ? 'Product name*' : unit?.item?.barcodeId}
                                     disabled={!editMode}
                                     onChange={updateField}
-                                    defaultValue={item?.item?.name} />
+                                    defaultValue={unit?.item?.name} />
                             </Box>
                             <Box flexShrink={4}>
                                 <TextField
@@ -162,7 +160,7 @@ const ItemModal: React.FC<Props> = (props) => {
                                     name="quantity"
                                     onChange={updateField}
                                     placeholder="0"
-                                    defaultValue={item?.quantity} />
+                                    defaultValue={unit?.quantity} />
                             </Box>
                         </Box>
                     </DialogTitle>
@@ -196,10 +194,10 @@ const ItemModal: React.FC<Props> = (props) => {
                                 Edit
                             </Button>
                             : <>
-                                <Button autoFocus onClick={() => props.onClose(false)} color="primary">
+                                <Button onClick={() => props.onClose(false)} color="primary">
                                     Close
                                 </Button>
-                                <Button autoFocus onClick={onSaveChanges} color="primary">
+                                <Button onClick={onSaveChanges} color="primary">
                                     Save changes
                                 </Button>
                             </>
