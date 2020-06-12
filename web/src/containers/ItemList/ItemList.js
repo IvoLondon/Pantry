@@ -78,17 +78,18 @@ const ItemList = () => {
             if (filterMode.hasOwnProperty('name') && filterMode.name.length > 2) {
                 const val = filterMode.name;
                 itemsList = itemsList.filter(el => {
-                    return el.name.toLowerCase().includes(val.toLowerCase());
+                    return el.item.name.toLowerCase().includes(val.toLowerCase());
                 });
             }
 
             if (filterMode.hasOwnProperty('macros')) {
                 const val = filterMode.macros;
+
                 itemsList.sort((elOne, elTwo) => {
                     if (val === 'protein') {
-                        return elTwo.macros[val] - elOne.macros[val];
+                        return elTwo.item.macros[val] - elOne.item.macros[val];
                     } else {
-                        return elTwo.macros[val]?.total - elOne.macros[val]?.total;
+                        return elTwo.item.macros[val]?.total - elOne.item.macros[val]?.total;
                     }
                 });
             }
