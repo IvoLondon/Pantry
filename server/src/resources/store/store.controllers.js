@@ -38,12 +38,12 @@ export const getOne = async (req, res) => {
     }
 }
 
-export const getOneByField = model => async (req, res) => {
+export const getOneByField = async (req, res) => {
     if(!Object.keys(req.body).length) {
         res.status(400).end()
     }
     try {
-        const doc = await model
+        const doc = await Store
             .findOne({ ...req.body })
             .lean()
             .exec()
@@ -122,28 +122,29 @@ export const updateOne = async (req, res) => {
     }
 }
   
-export const removeOne = model => async (req, res) => {
-    try {
-        const removed = await model.findOneAndRemove({
-            barcodeId: req.params.id
-        })
+// TODO: Decide if I need removeOne from STORE
+// export const removeOne = (req, res) => {
+//     try {
+//         const removed = await Store.findOneAndRemove({
+//             barcodeId: req.params.id
+//         })
     
-        if (!removed) {
-            return res.status(400).end()
-        }
+//         if (!removed) {
+//             return res.status(400).end()
+//         }
     
-        return res.status(200).json({ data: removed })
-    } catch (e) {
-        console.error(e)
-        res.status(400).end()
-    }
-}
+//         return res.status(200).json({ data: removed })
+//     } catch (e) {
+//         console.error(e)
+//         res.status(400).end()
+//     }
+// }
 
 export const controllers = {
-    removeOne: removeOne(Store),
+    //removeOne: removeOne,
     updateOne: updateOne,
     getOne: getOne,
-    getOneByField: getOneByField(Store),
+    getOneByField: getOneByField,
     createItemInStore: createItemInStore
 }
   

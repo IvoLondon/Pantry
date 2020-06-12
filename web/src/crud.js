@@ -59,15 +59,3 @@ export const requestAuth = (user) => {
     };
     return fetch(`${process.env.REACT_APP_SERVER}/auth/signin`, options);
 }
-
-export const requestCheckAuth = (user) => {
-    const options = {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-    };
-    return fetch(`${process.env.REACT_APP_SERVER}/auth/checkAuth`, options);
-}

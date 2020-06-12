@@ -11,22 +11,24 @@ const ItemsContext = (props) => {
 
     const authenticate = () => {
         setLogin(true);
+        fetchData();
     }
 
     useEffect(() => {
-        requestCheckAuth().then(data => {
-            if (data?.status !== 200) {
-                setLogin(false);
-            } else {
-                fetchData();
-            }
-        });
+        fetchData();
     }, []);
 
     const fetchData = async () => {
+       
         try {
             const response = await requestItems();
-            getItems(response.data);
+            if (response.status === 200) {
+                getItems(response.data);
+            } else if(response.status === 401) {
+                setLogin(false);
+            } else {
+                throw new Error('Fetch data failed');
+            }
         } catch (e) {
             console.log(e);
         };

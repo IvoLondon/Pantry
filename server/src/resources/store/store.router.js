@@ -12,8 +12,8 @@ router.route('/store/find')
 
 router.route('/store/:id')
     .get(controllers.getOne)
-    .put(controllers.updateOne)
-    .delete(controllers.removeOne);
+    .put(controllers.updateOne);
+    //.delete(controllers.removeOne);
 
 
 

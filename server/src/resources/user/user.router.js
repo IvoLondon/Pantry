@@ -10,7 +10,4 @@ router.route('/signup')
 router.route('/signin')
     .post(controllers.signInUser);
 
-router.route('/checkAuth')
-    .post(controllers.checkAuth);
-
 export default router;
