@@ -59,3 +59,9 @@ export const requestAuth = (user) => {
     };
     return fetch(`${process.env.REACT_APP_SERVER}/auth/signin`, options);
 }
+
+
+/* THIRD PARTY CALLS */
+export const worldOpenFoodFactsAPI = async (id) => {
+    return await fetch(`https://world.openfoodfacts.org/api/v0/product/${id}.json`).then(response => response.json());
+}

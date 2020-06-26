@@ -1,5 +1,7 @@
 import _ from 'lodash/fp';
 import React, { useState } from 'react';
+import { INITIAL_ITEM } from './const';
+import { cloneDeep } from 'lodash';
 
 export const whatUpdated = (prevProps, prevState, props, state) => {
     Object.entries(props).forEach(([key, val]) =>
@@ -81,3 +83,25 @@ export const storeCodes = [
     //     <option value="code_93">Code 93</option>
     // </select>
 ];
+
+export const worldOpenFoodConverter = (data, barcodeType) => {
+    const itemObj = cloneDeep(INITIAL_ITEM);
+    itemObj.quantity = 1;
+    itemObj.continuous = false;
+
+    itemObj.item.name = data.product.product_name;
+    itemObj.item.calories = Math.ceil(data.product.nutriments.energy / 4.1) ?? 0;
+    itemObj.item.barcodeId = data.code;
+    itemObj.item.barcodeType = barcodeType;
+    itemObj.item.macros.carb.total = data.product.nutriments.carbohydrates  ?? 0;
+    itemObj.item.macros.carb.sugar = data.product.nutriments.sugars  ?? 0;
+    
+    itemObj.item.macros.fat.total = data.product.nutriments.fat  ?? 0;
+    itemObj.item.macros.fat.saturated = data.product.nutriments['saturated-fat'] ?? 0;
+    itemObj.item.macros.fat.unsaturated = Math.floor(((data.product.nutriments['monounsaturated-fat'] ?? 0) + (data.product.nutriments['polyunsaturated-fat'] ?? 0) * 100)) / 100;
+    itemObj.item.macros.fat.trans = data.product.nutriments['trans-fat'] ?? 0;
+
+    itemObj.item.macros.protein = data.product.nutriments.proteins;
+
+    return itemObj;
+}

@@ -20,9 +20,10 @@ export const getOne = async (req, res) => {
             quantity: 1,
             continuous: false,
         };
+        
         if(stock) {
             for(let i of stock.items) {
-                if(JSON.stringify(stock.items[0].item) == JSON.stringify(itemInStore._id)) {
+                if(JSON.stringify(i.item) == JSON.stringify(itemInStore._id)) { 
                     itemInStock = {
                         quantity: i.quantity,
                         continuous: i.continuous

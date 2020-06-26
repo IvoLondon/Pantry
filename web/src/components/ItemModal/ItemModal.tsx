@@ -17,13 +17,10 @@ import {
     InputLabel,
     MenuItem
 } from '@material-ui/core';
-import { 
-    storeCodes,
-} from './../../utilities';
+import { storeCodes } from './../../utilities';
+import { INITIAL_ITEM } from './../../const';
+import { ItemInterface } from './../../constInterfaces';
 import './style.scss';
-import {
-    ItemInterface
-} from './interfaces';
 
 interface Props {
     open: boolean,
@@ -35,21 +32,6 @@ interface Props {
 }
 
 const ItemModal: React.FC<Props> = (props) => {
-    const INITIAL_ITEM: ItemInterface = {
-        quantity: 0,
-        continuous: false,
-        item: {
-            name: '',
-            calories: 0,
-            barcodeId: '',
-            barcodeType: '',
-            macros: {
-                carb: { total: 0, sugar: 0 },
-                fat: { total: 0, saturated: 0, unsaturated: 0, trans: 0 },
-                protein: 0
-            },    
-        }
-    };
 
     const [unit, setUnit] = useState<ItemInterface>(INITIAL_ITEM);
     const [editMode, setEditMode] = useState(false);

@@ -8,13 +8,15 @@ import './styles.scss';
 import {
     requestSingleItem,
     requestCreateItem,
-    requestUpdateItem
+    requestUpdateItem,
+    worldOpenFoodFactsAPI
 } from './../../crud';
 import { Context } from './../ItemsContext';
 import HeaderControls from './../../components/HeaderControls/HeaderControls';
 import NewProductModal from '../../components/NewProductModal/NewProductModal';
 import ItemModal from './../../components/ItemModal/ItemModal';
 import ResultModal from './../../components/ResultModal/ResultModal';
+import { worldOpenFoodConverter } from '../../utilities';
 
 import {
     reducer,
@@ -45,11 +47,18 @@ const Header = () => {
 
     const onDetect = async ({ barcodeId, barcodeType }) => {
         const fetchedItem = await requestSingleItem(barcodeId);
-        //TODO: ADD THIRD PARTY SCRIPTS
+
         if (fetchedItem.data) {
             dispatch({ type: ITEM_FOUND, payload: { data: fetchedItem.data } });
         } else {
-            dispatch({ type: SHOW_RESULT_MODAL, payload: { show: true, barcodeId, barcodeType } });
+            const worldOpenFoodData = await worldOpenFoodFactsAPI(barcodeId);
+            if (worldOpenFoodData.status) {
+                dispatch({ type: ITEM_FOUND, payload: { data: worldOpenFoodConverter(worldOpenFoodData, barcodeType) } });
+            } else {
+                console.log('NEXT API')
+
+                dispatch({ type: SHOW_RESULT_MODAL, payload: { show: true, barcodeId, barcodeType } });
+            }
         }
     };
 
