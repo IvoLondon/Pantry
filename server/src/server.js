@@ -16,7 +16,11 @@ export const app = express();
 app.disable('x-powered-by');
 
 app.use(cookieParser());
-app.use(cors({ credentials: true, origin: `${configs.clientHostUrl}` }));
+if (process.env.NODE_ENV === 'development') {
+    app.use(cors({ credentials: true, origin: `${configs.serverHostUrl}:${configs.serverHostPort}` }));
+} else {
+    app.use(cors({ credentials: true, origin: `${configs.serverHostUrl}` }));
+}
 app.use(json());
 app.use(urlencoded({ extended: true }));
 app.use(morgan('dev'));

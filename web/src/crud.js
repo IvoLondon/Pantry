@@ -1,9 +1,16 @@
+let REACT_APP_SERVER;
+if (process.env.NODE_ENV === 'development') {
+    REACT_APP_SERVER = `${process.env.REACT_APP_SERVER}:${process.env.REACT_APP_SERVER_PORT}`
+} else {
+    REACT_APP_SERVER = process.env.REACT_APP_SERVER
+}
+
 export const requestItems = () => {
     const options = {
         method: 'GET',
         credentials: 'include'
     }
-    return fetch(`${process.env.REACT_APP_SERVER}/api/stock`, options)
+    return fetch(`${REACT_APP_SERVER}/api/stock`, options)
         .then(response => response.json());
 };
 
@@ -15,7 +22,7 @@ export const requestUpdateItem = (id, unit) => {
         credentials: 'include',
         body: JSON.stringify(unit)
     };
-    return fetch(`${process.env.REACT_APP_SERVER}/api/store/${id}`, options);
+    return fetch(`${REACT_APP_SERVER}/api/store/${id}`, options);
 };
 
 export const requestSingleItem = (id) => {
@@ -23,7 +30,7 @@ export const requestSingleItem = (id) => {
         method: 'GET',
         credentials: 'include',
     }
-    return fetch(`${process.env.REACT_APP_SERVER}/api/store/${id}`, options)
+    return fetch(`${REACT_APP_SERVER}/api/store/${id}`, options)
         .then(response => response.json());
 };
 
@@ -43,7 +50,7 @@ export const requestCreateItem = (item) => {
         body: JSON.stringify(newItem),
         credentials: 'include',
     };
-    return fetch(`${process.env.REACT_APP_SERVER}/api/store`, options)
+    return fetch(`${REACT_APP_SERVER}/api/store`, options)
         .then(response => response.json());
 };
 
@@ -57,7 +64,7 @@ export const requestAuth = (user) => {
         credentials: 'include',
         body: JSON.stringify(user)
     };
-    return fetch(`${process.env.REACT_APP_SERVER}/auth/signin`, options);
+    return fetch(`${REACT_APP_SERVER}/auth/signin`, options);
 }
 
 
