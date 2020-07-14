@@ -1,10 +1,13 @@
 <div align="center">
-    <img src="./git_assets/logo.png" />
 
-Official demo page <a href="http://myfoodpantry.co.uk/">http://myfoodpantry.co.uk/</a>
+![alt text](./git_assets/logo.png "Logo")
+    
+Official demo page [http://myfoodpantry.co.uk/](http://myfoodpantry.co.uk/)
 </div>
 
-To run the project locally, you need to have <a target="_blank" href="https://docs.mongodb.com/manual/installation/">MongoDB Installed.</a>
+<h4>If you are constantly buying the same ingreadients you have at home and you can't keep track of your stocks - myfoodpantry </h4>
+
+To run the project locally, you need to have [MongoDB Installed](https://docs.mongodb.com/manual/installation/).
 
 To run web:
 
