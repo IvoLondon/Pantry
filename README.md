@@ -2,7 +2,6 @@
 
 ![alt text](./git_assets/logo.png "Logo")
     
-Official demo page [http://myfoodpantry.co.uk/](http://myfoodpantry.co.uk/)
 </div>
 
 <h4>If you are constantly buying the same ingreadients you have at home and you can't keep track of your stocks - myfoodpantry </h4>

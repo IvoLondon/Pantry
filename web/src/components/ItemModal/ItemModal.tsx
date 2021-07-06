@@ -172,9 +172,14 @@ const ItemModal: React.FC<Props> = (props) => {
                     </DialogContent>
                     <DialogActions>
                         {!editMode
-                            ? <Button autoFocus onClick={() => setEditMode(true)} color="primary">
-                                Edit
-                            </Button>
+                            ? <>
+                                <Button autoFocus onClick={() => setEditMode(true)} color="primary">
+                                    Edit
+                                </Button>
+                                <Button onClick={onSaveChanges} color="primary">
+                                    Save changes
+                                </Button>
+                                </>
                             : <>
                                 <Button onClick={() => props.onClose(false)} color="primary">
                                     Close
